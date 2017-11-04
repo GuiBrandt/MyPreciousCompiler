@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1509823006 source:/home/guilherme/Documentos/AnalisadorLexico/Lexer.cpp
+	"include/Lexer.hpp"
+
+1509822989 /home/guilherme/Documentos/AnalisadorLexico/include/Lexer.hpp
+	<cstdio>
+	"TokenType.hpp"
+
+1509822474 /home/guilherme/Documentos/AnalisadorLexico/include/TokenType.hpp
+
+1509822955 source:/home/guilherme/Documentos/AnalisadorLexico/main.cpp
+	"include/Lexer.hpp"
+
