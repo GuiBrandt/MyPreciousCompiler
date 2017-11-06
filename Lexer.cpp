@@ -1,9 +1,10 @@
 #include "include/Lexer.hpp"
 #include <ctype.h>
 #include <cstring>
+#include <stdlib.h>
+
 namespace AnalisadorLexicoMaligno
 {
-
     char* Lexer::reserved[] = {
         "if", "var", "procedure", "function", "begin", "while",
         "end", "program", "+", "-", "/", "*", "mod", "and", "or",
@@ -37,104 +38,104 @@ namespace AnalisadorLexicoMaligno
         char* temp;
         int temp_length, temp_used;
 
-        char chr;
+        char chr = (char)fgetc(_file);
 
-        do
+        if (isalpha(chr))
         {
-            chr = (char)fgetc(_file);
+            temp = (char*)malloc(32);
+            temp_length = 32;
+            temp_used = 0;
 
-            if (isalpha(chr))
+            do
             {
-                temp = (char*)malloc(32);
-                temp_length = 32;
-                temp_used = 0;
-
-                do
+                // Realoca o buffer caso necessário
+                if (temp_length <= temp_used)
                 {
-                    // Realoca o buffer caso necessÃ¡rio
-                    if (temp_length <= temp_used)
-                    {
-                        char* aux = (char*)malloc(temp_length * 2);
-                        memcpy(aux, temp, temp_length);
-                        temp_length *= 2;
+                    char* aux = (char*)malloc(temp_length * 2);
+                    memcpy(aux, temp, temp_length);
+                    temp_length *= 2;
 
-                        free(temp);
-                        temp = aux;
-                    }
-
-                    temp[temp_used++] = chr;
-                    chr = (char)fgetc(_file);
-                }
-                while (isalnum(chr));
-
-                TokenType r= getTokenType(temp);
-                if(r==NAME)
-                    _name=temp;
-                else
                     free(temp);
-
-                return r;
-
-            }
-            else if (isdigit(chr))
-            {
-                temp = (char*)malloc(8);
-                temp_used = 0;
-
-                do
-                {
-                    temp[temp_used++] = chr;
-                    chr = (char)fgetc(_file);
+                    temp = aux;
                 }
-                while (isnum(chr));
 
-                _integer=(int)strtol(temp,NULL,10);
-                free(temp);
-                return NUMBER;
+                temp[temp_used++] = chr;
+                chr = (char)fgetc(_file);
             }
+            while (isalnum(chr));
+
+            TokenType r= getTokenType(temp);
+            if(r==NAME)
+                _name=temp;
             else
+                free(temp);
+
+            return r;
+
+        }
+        else if (isdigit(chr))
+        {
+            temp = (char*)malloc(8);
+            temp_used = 0;
+
+            do
             {
-                char* temp= (char*)malloc(sizeof(char)*2);
-                temp_length = 2;
-                temp_used = 0;
-
-                do
-                {
-                    // Realoca o buffer caso necessÃ¡rio
-                    if (temp_length <= temp_used)
-                    {
-                        char* a = (char*)malloc(temp_length * 2);
-                        memcpy(a, temp, temp_length);
-                        temp_length *= 2;
-
-                        free(temp);
-                        temp = a;
-                    }
-                    temp[temp_used++] = chr;
-                    chr = fgetc(_file);
-                }
-                while (!isalnum(chr) && chr!= '\n' && chr!= ' ' && chr != '\t');
-
-                TokenType t = getTokenType(temp);
-                return t;
+                temp[temp_used++] = chr;
+                chr = (char)fgetc(_file);
             }
+            while (isdigit(chr));
 
-        } while (chr != EOF)
+            _integer=(int)strtol(temp,NULL,10);
+            free(temp);
+            return NUMBER;
+        }
+        else
+        {
+            char* temp= (char*)malloc(sizeof(char)*2);
+            temp_length = 2;
+            temp_used = 0;
+
+            do
+            {
+                // Realoca o buffer caso necessário
+                if (temp_length <= temp_used)
+                {
+                    char* a = (char*)malloc(temp_length * 2);
+                    memcpy(a, temp, temp_length);
+                    temp_length *= 2;
+
+                    free(temp);
+                    temp = a;
+                }
+                temp[temp_used++] = chr;
+                chr = fgetc(_file);
+            }
+            while (!isalnum(chr) && chr!= '\n' && chr!= ' ' && chr != '\t');
+
+            TokenType t = getTokenType(temp);
+            return t;
+        }
     }
 
-    char Lexer::hasMoreTokens()
+    char Lexer::hasMoreTokens() const
     {
-
+        char chr;
+        do{
+            chr = fgetc(_file);
+            if(chr!='\n' && chr!='\n' && chr!= ' ')
+                return true;
+        }while(chr!=EOF);
+        return false;
     }
 
-    char* getName()
+    char* Lexer::getName() const
     {
-
+        return _name;
     }
 
-    int getValue()
+    int Lexer::getValue() const
     {
-
+        return _integer;
     }
 
     Lexer::~Lexer()

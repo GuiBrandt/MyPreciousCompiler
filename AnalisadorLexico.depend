@@ -11,3 +11,12 @@
 1509822955 source:/home/guilherme/Documentos/AnalisadorLexico/main.cpp
 	"include/Lexer.hpp"
 
+1509971743 source:z:\analisadorlexico\main.cpp
+	"include/Lexer.hpp"
+
+1509974748 z:\analisadorlexico\include\lexer.hpp
+	<cstdio>
+	"TokenType.hpp"
+
+1509972220 z:\analisadorlexico\include\tokentype.hpp
+

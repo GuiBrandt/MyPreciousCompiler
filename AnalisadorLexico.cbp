@@ -31,6 +31,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="Lexer.cpp" />
+		<Unit filename="include/Lexer.hpp" />
+		<Unit filename="include/TokenType.hpp" />
+		<Unit filename="main.cpp" />
 		<Extensions>
 			<envvars />
 			<code_completion />

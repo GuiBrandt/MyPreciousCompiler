@@ -25,10 +25,10 @@ namespace AnalisadorLexicoMaligno
             ~Lexer();
 
             TokenType nextToken();
-            char hasMoreTokens();
+            char hasMoreTokens() const;
 
-            char* getName();
-            int getValue();
+            char* getName() const;
+            int getValue() const;
     };
 };
 
