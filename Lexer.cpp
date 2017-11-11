@@ -51,7 +51,7 @@ namespace AnalisadorLexicoMaligno
                 // Realoca o buffer caso necessário
                 if (temp_length <= temp_used)
                 {
-                    char* aux = (char*)malloc(temp_length * 2);
+                    char* aux = (char*)malloc(temp_length * 2 + 1);
                     memcpy(aux, temp, temp_length);
                     temp_length *= 2;
 
@@ -64,6 +64,7 @@ namespace AnalisadorLexicoMaligno
             }
             while (isalnum(chr));
 
+            temp[temp_used]='\0';
             TokenType r= getTokenType(temp);
             if(r==NAME)
                 _name=temp;
@@ -75,23 +76,7 @@ namespace AnalisadorLexicoMaligno
         }
         else if (isdigit(chr))
         {
-            temp = (char*)malloc(8);
-            temp_used = 0;
-
-            do
-            {
-                temp[temp_used++] = chr;
-                chr = (char)fgetc(_file);
-            }
-            while (isdigit(chr));
-
-            _integer=(int)strtol(temp,NULL,10);
-            free(temp);
-            return NUMBER;
-        }
-        else
-        {
-            char* temp= (char*)malloc(sizeof(char)*2);
+            char* temp= (char*)malloc(sizeof(char)*2 + 1);
             temp_length = 2;
             temp_used = 0;
 
@@ -100,7 +85,35 @@ namespace AnalisadorLexicoMaligno
                 // Realoca o buffer caso necessário
                 if (temp_length <= temp_used)
                 {
-                    char* a = (char*)malloc(temp_length * 2);
+                    char* a = (char*)malloc(temp_length * 2 + 1);
+                    memcpy(a, temp, temp_length);
+                    temp_length *= 2;
+
+                    free(temp);
+                    temp = a;
+                }
+                temp[temp_used++] = chr;
+                chr = (char)fgetc(_file);
+            }
+            while (isdigit(chr));
+
+            temp[temp_used]='\0';
+            _integer=(int)strtol(temp,NULL,10);
+            free(temp);
+            return NUMBER;
+        }
+        else
+        {
+            char* temp= (char*)malloc(sizeof(char)*2 + 1);
+            temp_length = 2;
+            temp_used = 0;
+
+            do
+            {
+                // Realoca o buffer caso necessário
+                if (temp_length <= temp_used)
+                {
+                    char* a = (char*)malloc(temp_length * 2 + 1);
                     memcpy(a, temp, temp_length);
                     temp_length *= 2;
 
@@ -112,7 +125,9 @@ namespace AnalisadorLexicoMaligno
             }
             while (!isalnum(chr) && chr!= '\n' && chr!= ' ' && chr != '\t');
 
+            temp[temp_used]='\0';
             TokenType t = getTokenType(temp);
+            free(temp);
             return t;
         }
     }
