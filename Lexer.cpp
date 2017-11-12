@@ -1,7 +1,7 @@
 #include "include/Lexer.hpp"
 #include <ctype.h>
 #include <cstring>
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace AnalisadorLexicoMaligno
 {
