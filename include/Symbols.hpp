@@ -74,7 +74,7 @@ class Procedure : public Symbol
 class Function : public Procedure
 {
     public:
-        Function(const char*, unsigned char, ValueType, int, ...);
+        template<typename... Values> Function(const char*, unsigned char, ValueType, int, Values...);
 
         ValueType getReturnType() const;
 

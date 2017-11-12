@@ -25,3 +25,11 @@
 
 1510445381 /home/guilherme/Documentos/AnalisadorLexico/include/Symbol.hpp
 
+1510447315 source:/home/guilherme/Documentos/AnalisadorLexico/Symbols.cpp
+	"include/Symbols.hpp"
+	<cstring>
+	<cstdarg>
+	<cstdlib>
+
+1510447338 /home/guilherme/Documentos/AnalisadorLexico/include/Symbols.hpp
+

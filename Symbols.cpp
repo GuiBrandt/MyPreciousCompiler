@@ -80,3 +80,14 @@ const Parameter* Procedure::getParameters() const
 {
     return this->_parameters;
 }
+
+template<typename... Values> Function::Function(const char* name, unsigned char level, ValueType type, int nParams, Values... params)
+: Procedure(name, level, nParams, params...)
+{
+    this->_returnType = type;
+}
+
+ValueType Function::getReturnType() const
+{
+    return this->_returnType;
+}
