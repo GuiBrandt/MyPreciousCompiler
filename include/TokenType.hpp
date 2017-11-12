@@ -1,6 +1,9 @@
 #ifndef TOKENTYPE_HPP_INCLUDED
 #define TOKENTYPE_HPP_INCLUDED
 
+/**
+ * Enumerador de tipos de palavra do analisador léxico
+ */
 typedef enum
 {
     IF,
