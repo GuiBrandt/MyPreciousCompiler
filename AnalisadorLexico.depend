@@ -5,7 +5,7 @@
 	<cstring>
 	<cstdlib>
 
-1510442305 /home/guilherme/Documentos/AnalisadorLexico/include/Lexer.hpp
+1510447560 /home/guilherme/Documentos/AnalisadorLexico/include/Lexer.hpp
 	<cstdio>
 	"TokenType.hpp"
 

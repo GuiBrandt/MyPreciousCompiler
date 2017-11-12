@@ -4,32 +4,47 @@
 #include <cstdio>
 #include "TokenType.hpp"
 
-namespace AnalisadorLexicoMaligno
+/**
+ * Classe para o analisador léxico do compilador
+ */
+class Lexer
 {
-    class Lexer
-    {
-        private:
+    public:
 
-            static char* reserved[];
+        /// Construtor
+        Lexer(char*);
 
-            FILE* _file;
+        /// Destrutor
+        ~Lexer();
 
-            char* _name;
-            int _integer;
+        /// Avança uma palavra no arquivo
+        TokenType nextToken();
 
-            TokenType getTokenType(char*);
+        /// Verifica se o arquivo ainda contém alguma palavra
+        char hasMoreTokens() const;
 
-        public:
+        /// Obtém o último nome lido
+        char* getName() const;
 
-            Lexer(char*);
-            ~Lexer();
+        /// Obtém o último inteiro lido
+        int getValue() const;
 
-            TokenType nextToken();
-            char hasMoreTokens() const;
+    private:
 
-            char* getName() const;
-            int getValue() const;
-    };
+        /// Vetor de palavras reservadas (que o compilador reconhece)
+        static char* reserved[];
+
+        /// Arquivo sendo lido
+        FILE* _file;
+
+        /// Último nome lido
+        char* _name;
+
+        /// Último inteiro lido
+        int _integer;
+
+        /// Determina o tipo de uma palavra lida
+        TokenType getTokenType(char*);
 };
 
 #endif
