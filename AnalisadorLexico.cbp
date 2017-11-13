@@ -34,8 +34,10 @@
 			<Add option="-Wwrite-strings" />
 		</Compiler>
 		<Unit filename="Lexer.cpp" />
+		<Unit filename="Parser.cpp" />
 		<Unit filename="Symbols.cpp" />
 		<Unit filename="include/Lexer.hpp" />
+		<Unit filename="include/Parser.hpp" />
 		<Unit filename="include/Symbols.hpp" />
 		<Unit filename="include/TokenType.hpp" />
 		<Unit filename="main.cpp" />

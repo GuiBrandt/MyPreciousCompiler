@@ -7,6 +7,7 @@
 typedef enum
 {
     IF,
+    ELSE,
     VAR,
     PROCEDURE,
     FUNCTION,

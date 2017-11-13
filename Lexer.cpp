@@ -5,7 +5,7 @@
 
 /// Vetor de palavras reservadas
 char* Lexer::reserved[] = {
-    "if", "var", "procedure", "function", "begin", "while",
+    "if", "else", "var", "procedure", "function", "begin", "while",
     "end", "program", "+", "-", "/", "*", "mod", "and", "or",
     "xor", "not", "=", "<>", ">", "<", ">=", "<=", "(", ")",
     "[", "]", ":=", "write", "read", "true", "false", NULL
@@ -173,7 +173,7 @@ TokenType Lexer::getToken()
  *
  * \return True se houverem mais palavras e False se não
  */
-char Lexer::hasMoreTokens() const
+char Lexer::hasMoreTokens()
 {
     char chr;
     do

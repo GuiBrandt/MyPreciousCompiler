@@ -33,3 +33,26 @@
 
 1510447338 /home/guilherme/Documentos/AnalisadorLexico/include/Symbols.hpp
 
+1510577085 source:c:\users\u16182\desktop\mypreciouscompiler\main.cpp
+	"include/Lexer.hpp"
+
+1510577085 c:\users\u16182\desktop\mypreciouscompiler\include\lexer.hpp
+	<cstdio>
+	"TokenType.hpp"
+
+1510578534 c:\users\u16182\desktop\mypreciouscompiler\include\tokentype.hpp
+
+1510577085 source:c:\users\u16182\desktop\mypreciouscompiler\symbols.cpp
+	"include/Symbols.hpp"
+	<cstring>
+	<cstdarg>
+	<cstdlib>
+
+1510577085 c:\users\u16182\desktop\mypreciouscompiler\include\symbols.hpp
+
+1510580290 source:c:\users\u16182\desktop\mypreciouscompiler\lexer.cpp
+	"include/Lexer.hpp"
+	<ctype.h>
+	<cstring>
+	<cstdlib>
+
