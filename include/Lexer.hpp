@@ -20,8 +20,11 @@ class Lexer
         /// Avança uma palavra no arquivo
         TokenType nextToken();
 
+        /// Obtém a última palavra lida do arquivo
+        TokenType getToken();
+
         /// Verifica se o arquivo ainda contém alguma palavra
-        char hasMoreTokens() const;
+        char hasMoreTokens();
 
         /// Obtém o último nome lido
         char* getName() const;
@@ -42,6 +45,9 @@ class Lexer
 
         /// Último inteiro lido
         int _integer;
+
+        /// Última palavra lida
+        TokenType _lastToken = (TokenType)-1;
 
         /// Determina o tipo de uma palavra lida
         TokenType getTokenType(char*);

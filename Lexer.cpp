@@ -50,6 +50,9 @@ TokenType Lexer::getTokenType(char* token)
  */
 TokenType Lexer::nextToken()
 {
+	if (!hasMoreTokens())
+		return UNKNOWN;
+
     char* temp;
     int temp_length, temp_used;
 
@@ -79,10 +82,10 @@ TokenType Lexer::nextToken()
         }
         while (isalnum(chr));
 
-        temp[temp_used]='\0';
-        TokenType r= getTokenType(temp);
-        if(r==NAME)
-            _name=temp;
+        temp[temp_used] = '\0';
+        TokenType r = getTokenType(temp);
+        if (r == NAME)
+            _name = temp;
         else
             free(temp);
 
@@ -112,14 +115,17 @@ TokenType Lexer::nextToken()
         }
         while (isdigit(chr));
 
-        temp[temp_used]='\0';
-        _integer=(int)strtol(temp,NULL,10);
+        temp[temp_used] = '\0';
+
+        _integer = (int)strtol(temp, NULL, 10);
+
         free(temp);
+
         return NUMBER;
     }
     else
     {
-        char* temp= (char*)malloc(sizeof(char)*2 + 1);
+        char* temp = (char*)malloc(sizeof(char) * 2 + 1);
         temp_length = 2;
         temp_used = 0;
 
@@ -135,16 +141,31 @@ TokenType Lexer::nextToken()
                 free(temp);
                 temp = a;
             }
+
             temp[temp_used++] = chr;
             chr = fgetc(_file);
         }
         while (!isalnum(chr) && chr!= '\n' && chr!= ' ' && chr != '\t');
 
-        temp[temp_used]='\0';
+        temp[temp_used] = '\0';
         TokenType t = getTokenType(temp);
         free(temp);
+
         return t;
     }
+}
+
+/**
+ * Obtém o tipo da última palavra lida sem consumí-la
+ *
+ * \return O tipo da última palavra lida do arquivo
+ */
+TokenType Lexer::getToken()
+{
+	if (_lastToken == -1)
+		return nextToken();
+
+	return _lastToken;
 }
 
 /**
@@ -158,10 +179,14 @@ char Lexer::hasMoreTokens() const
     do
     {
         chr = fgetc(_file);
-        if(chr!='\n' && chr!='\n' && chr!= ' ')
+        if (chr != '\n' && chr != '\n' && chr != ' ')
+        {
+        	ungetc(chr, _file);
             return true;
+        }
     }
-    while(chr!=EOF);
+    while (chr != EOF);
+
     return false;
 }
 
