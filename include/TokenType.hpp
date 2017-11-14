@@ -48,6 +48,10 @@ typedef enum
     TRUE,
     FALSE,
 
+    COMMA,
+    SEMICOLON,
+    DOT,
+
     NUMBER,
     NAME,
     UNKNOWN

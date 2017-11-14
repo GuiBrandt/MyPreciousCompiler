@@ -15,6 +15,7 @@ class Parser
         void compileFunction();
         void compileIf();
         void compileWhile();
+        void compileParameter();
         void compileCompositeCommand();
         void compileCommand();
         ValueType compileExpression();

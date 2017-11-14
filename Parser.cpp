@@ -9,18 +9,12 @@ Parser::Parser(Lexer l)
 void Parser::compileIf()
 {
     TokenType prox = _lexer.nextToken();
-    if(prox!=IF)
-    {
-        fprintf(sdterr,"If esperado");
-        return;
-    }
+    if (prox != IF)
+        throw "If esperado";
 
     ValueType type = compileExpression();
     if(type != BOOLEAN)
-    {
-        fprintf(sdterr,"Expressão booleana esperada");
-        return;
-    }
+        throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
 
@@ -46,18 +40,12 @@ void Parser::compileIf()
 void Parser::compileWhile()
 {
     TokenType prox = _lexer.nextToken();
-    if(prox!=WHILE)
-    {
-        fprintf(sdterr,"While esperado");
-        return;
-    }
+    if(prox != WHILE)
+        throw "While esperado";
 
     ValueType type = compileExpression();
     if(type != BOOLEAN)
-    {
-        fprintf(sdterr,"Expressão booleana esperada");
-        return;
-    }
+        throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
 
@@ -73,15 +61,10 @@ void Parser::compileCompositeCommand()
     TokenType prox = _lexer.nextToken();
 
     if(prox != BEGIN)
-    {
-        fprintf(sdterr,"Begin esperado");
-        return;
-    }
-
+        throw "Begin esperado";
 
     while ((prox = _lexer.getToken()) != END)
         compileCommand();
-
 }
 
 void Parser::compileCommand()
@@ -96,5 +79,68 @@ void Parser::compileCommand()
         compileFunction();
     else if(prox == PROCEDURE)
         compileProcedure();
-    //else if(prox == NAME)
+    else if(prox == NAME)
+    {
+        prox = _lexer.nextToken();
+        prox = _lexer.netxToken();
+
+        if(prox == EQUAL)
+            compileVariable();
+        else if(prox == OPEN_PARENTESIS)
+            {
+                prox = getToken();
+                if(prox != CLOSE_PARENTESIS)
+                    compileParameter();
+        }
+        else
+            throw "Esse comando não existe";
+    }
+}
+
+void Parser::compileProgramBeginning()
+{
+    TokenType prox = _lexer.nextToken();
+    if(prox != PROGRAM)
+
+        throw "Program esperado";
+
+    prox = _lexer.nextToken();
+    if(prox != NAME)
+        throw "Nome do programa esperado";
+
+    prox = _lexer.nextToken();
+    if(prox == VAR)
+        compileVariable();
+
+    compileCompositeCommand();
+}
+
+ValueType Parser::compileExpression()
+{
+}
+
+void Parser::compileParameter()
+{
+    TokenType prox = _lexer.getToken();
+
+
+    while(prox != CLOSE_PARENTESIS)
+    {
+        prox = _lexer.nextToken();
+        if(prox != INTEGER && prox != BOOLEAN)
+        throw "Tipo do parâmetro esperado";
+
+        prox = _lexer.nextToken();
+
+        if(prox != NAME)
+            throw "Nome do parâmetro esperado";
+
+        prox = _lexer.nextToken();
+
+        if(prox != COMMA && prox != CLOSE_PARENTESIS)
+            throw "Vírgula esperada";
+    }
+
+}
+
 }
