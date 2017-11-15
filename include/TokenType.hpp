@@ -16,6 +16,9 @@ typedef enum
     END,
     PROGRAM,
 
+    INTEGER,
+    BOOLEAN,
+
     SUM,
     SUBTRACT,
     DIVIDE,

@@ -56,3 +56,26 @@
 	<cstring>
 	<cstdlib>
 
+1510776902 source:c:\users\user\documentos\projects\mypreciouscompiler\lexer.cpp
+	"include/Lexer.hpp"
+	<ctype.h>
+	<cstring>
+	<cstdlib>
+
+1510776901 c:\users\user\documentos\projects\mypreciouscompiler\include\lexer.hpp
+	<cstdio>
+	"TokenType.hpp"
+
+1510777072 c:\users\user\documentos\projects\mypreciouscompiler\include\tokentype.hpp
+
+1510770435 source:c:\users\user\documentos\projects\mypreciouscompiler\main.cpp
+	"include/Lexer.hpp"
+
+1510770435 source:c:\users\user\documentos\projects\mypreciouscompiler\symbols.cpp
+	"include/Symbols.hpp"
+	<cstring>
+	<cstdarg>
+	<cstdlib>
+
+1510777083 c:\users\user\documentos\projects\mypreciouscompiler\include\symbols.hpp
+

@@ -1,11 +1,18 @@
 #include "include/Parser.hpp"
+#include "include/Lexer.hpp"
+
 #include <cstdio>
 
-Parser::Parser(Lexer l)
-{
-    this->_lexer = l;
-}
+/**
+ * Construtor
+ *
+ * \param filename Nome do arquivo para se analisar
+ */
+Parser::Parser(const char* filename) : _lexer(filename) {}
 
+/**
+ * Compila um condicional
+ */
 void Parser::compileIf()
 {
     TokenType prox = _lexer.nextToken();
@@ -17,26 +24,26 @@ void Parser::compileIf()
         throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
-
     if(prox == BEGIN)
         compileCompositeCommand();
     else
         compileCommand();
 
     prox = _lexer.getToken();
-
-    if(prox == ELSE)
+    if (prox == ELSE)
     {
         prox = _lexer.nextToken();
 
-        if(prox == BEGIN)
+        if (prox == BEGIN)
             compileCompositeCommand();
         else
             compileCommand();
     }
 }
 
-
+/**
+ * Compila um repetidor `while'
+ */
 void Parser::compileWhile()
 {
     TokenType prox = _lexer.nextToken();
@@ -56,10 +63,12 @@ void Parser::compileWhile()
 
 }
 
+/**
+ * Compila um comando composto (começa em `begin', termina em `end')
+ */
 void Parser::compileCompositeCommand()
 {
     TokenType prox = _lexer.nextToken();
-
     if(prox != BEGIN)
         throw "Begin esperado";
 
@@ -67,6 +76,9 @@ void Parser::compileCompositeCommand()
         compileCommand();
 }
 
+/**
+ * Compila um comando simples
+ */
 void Parser::compileCommand()
 {
     TokenType prox = _lexer.getToken();
@@ -82,13 +94,13 @@ void Parser::compileCommand()
     else if(prox == NAME)
     {
         prox = _lexer.nextToken();
-        prox = _lexer.netxToken();
+        prox = _lexer.nextToken();
 
         if(prox == EQUAL)
             compileVariable();
         else if(prox == OPEN_PARENTESIS)
             {
-                prox = getToken();
+                prox = _lexer.getToken();
                 if(prox != CLOSE_PARENTESIS)
                     compileParameter();
         }
@@ -97,6 +109,9 @@ void Parser::compileCommand()
     }
 }
 
+/**
+ * Compila o cabeçalho do programa
+ */
 void Parser::compileProgramBeginning()
 {
     TokenType prox = _lexer.nextToken();
@@ -115,19 +130,26 @@ void Parser::compileProgramBeginning()
     compileCompositeCommand();
 }
 
+/**
+ * Compila uma expressão
+ *
+ * \return O tipo da expressão compilada
+ */
 ValueType Parser::compileExpression()
 {
 }
 
+/**
+ * Compila uma lista de parâmetros
+ */
 void Parser::compileParameter()
 {
     TokenType prox = _lexer.getToken();
 
-
     while(prox != CLOSE_PARENTESIS)
     {
         prox = _lexer.nextToken();
-        if(prox != INTEGER && prox != BOOLEAN)
+        if (prox != INTEGER && prox != BOOLEAN)
         throw "Tipo do parâmetro esperado";
 
         prox = _lexer.nextToken();
@@ -140,7 +162,5 @@ void Parser::compileParameter()
         if(prox != COMMA && prox != CLOSE_PARENTESIS)
             throw "Vírgula esperada";
     }
-
-}
 
 }

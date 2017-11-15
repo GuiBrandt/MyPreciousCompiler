@@ -12,7 +12,7 @@ class Lexer
     public:
 
         /// Construtor
-        Lexer(char*);
+        Lexer(const char*);
 
         /// Destrutor
         ~Lexer();

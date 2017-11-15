@@ -16,7 +16,7 @@ char* Lexer::reserved[] = {
  *
  * \param filename Nome do arquivo a ser lido
  */
-Lexer::Lexer(char* filename)
+Lexer::Lexer(const char* filename)
 {
     _file = fopen(filename, "r");
 }

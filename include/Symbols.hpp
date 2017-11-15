@@ -6,8 +6,8 @@
  */
 typedef enum
 {
-    INTEGER,
-    BOOLEAN
+    tINTEGER,
+    tBOOLEAN
 }
 ValueType;
 
