@@ -24,6 +24,9 @@ class Symbol
         /// Obtém o nome do símbolo
         const char* getName() const;
 
+        /// Define o nome do símbolo
+        void setName(const char*);
+
         /// Obtém o nível do símbolo
         unsigned char getLevel() const;
 
@@ -84,6 +87,9 @@ class Parameter : public Symbol
         /// Obtém o tipo do parâmetro
         ValueType getType() const;
 
+        /// Define o tipo do símbolo
+        void setType(ValueType);
+
     private:
 
         /// Tipo do parâmetro
@@ -98,7 +104,7 @@ class Procedure : public Symbol
     public:
 
         /// Construtor
-        Procedure(const char*, unsigned char, int, ...);
+        Procedure(const char*, unsigned char, int, Parameter*);
 
         /// Obtém o número de parâmetros do procedimento
         int getParameterCount() const;
@@ -123,7 +129,7 @@ class Function : public Procedure
     public:
 
         /// Construtor
-        template<typename... Values> Function(const char*, unsigned char, ValueType, int, Values...);
+        Function(const char*, unsigned char, ValueType, int, Parameter*);
 
         /// Obtém o tipo de retorno da função
         ValueType getReturnType() const;

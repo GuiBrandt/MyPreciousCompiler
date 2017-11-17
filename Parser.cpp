@@ -59,6 +59,7 @@ void Parser::addVariable(Variable v)
     {
         Variable* aux = (Variable*)malloc(sizeof(Variable) * _varSize * 2);
         memcpy(aux, _var, sizeof(Variable) * _varSize);
+        free(_var);
         _var = aux;
         _varSize *= 2;
     }
@@ -72,6 +73,7 @@ void Parser::addProcedure(Procedure p)
     {
         Procedure* aux = (Procedure*)malloc(sizeof(Procedure) * _procedureSize * 2);
         memcpy(aux, _procedure, sizeof(Procedure) * _procedureSize);
+        free(_procedure);
         _procedure = aux;
         _procedureSize *= 2;
     }
@@ -85,6 +87,7 @@ void Parser::addFunction(Function f)
     {
         Function* aux = (Function*)malloc(sizeof(Function) * _functionSize * 2);
         memcpy(aux, _function, sizeof(Function) * _functionSize);
+        free(_function);
         _function = aux;
         _functionSize *= 2;
     }
@@ -92,7 +95,7 @@ void Parser::addFunction(Function f)
     _function[_functionIndex++] = f;
 }
 
-void Parser::deleteFunction(const char* name) const
+void Parser::deleteFunction(const char* name)
 {
     int i;
     for (i = 0; i < _functionIndex; i++)
@@ -109,7 +112,7 @@ void Parser::deleteFunction(const char* name) const
     throw "Função não encontrada";
 }
 
-void Parser::deleteProcedure(const char* name) const
+void Parser::deleteProcedure(const char* name)
 {
     int i;
     for (i = 0; i < _procedureIndex; i++)
@@ -126,7 +129,7 @@ void Parser::deleteProcedure(const char* name) const
     throw "Procedimento não encontrado";
 }
 
-void Parser::deleteVariable(const char* name) const
+void Parser::deleteVariable(const char* name)
 {
     int i;
     for (i = 0; i < _varIndex; i++)
@@ -275,29 +278,70 @@ ValueType Parser::compileExpression()
 /**
  * Compila uma lista de parâmetros
  */
-void Parser::compileParameterDeclaration()
+int Parser::compileParameterDeclaration(Parameter** params)
 {
-    TokenType prox = _lexer.getToken();
+    TokenType prox = _lexer.nextToken();
+    if (prox != OPEN_PARENTESIS)
+        throw "Abre parênteses esperado";
+
+    int n = 0;
+
+    int sz = 8;
+    *params = (Parameter*)malloc(sz * sizeof(Parameter));
 
     while(prox != CLOSE_PARENTESIS)
     {
         prox = _lexer.nextToken();
         if (prox != INTEGER && prox != BOOLEAN)
-        throw "Tipo do parâmetro esperado";
+            throw "Tipo do parâmetro esperado";
+
+        if (n >= sz)
+        {
+            Parameter* aux = (Parameter*)malloc(sizeof(Parameter) * sz * 2);
+            memcpy(aux, *params, sz);
+            sz *= 2;
+
+            free(*params);
+            *params = aux;
+        }
+
+        (*params)[n].setType(prox == INTEGER ? tINTEGER : tBOOLEAN);
 
         prox = _lexer.nextToken();
 
-        if(prox != NAME)
+        if (prox != NAME)
             throw "Nome do parâmetro esperado";
+
+        (*params)[n].setName(_lexer.getName());
 
         prox = _lexer.nextToken();
 
         if(prox != COMMA && prox != CLOSE_PARENTESIS)
             throw "Vírgula esperada";
+
+        n++;
     }
+
+    return n;
 }
 
 void Parser::compileProcedure()
 {
+    TokenType prox = _lexer.getToken();
 
+    if (prox != PROCEDURE)
+        throw "Declaração de procedimento esperada";
+
+    prox = _lexer.nextToken();
+    if (prox != NAME)
+        throw "Nome da função esperado";
+
+    const char* name = _lexer.getName();
+
+    Parameter* parameters;
+    int n = compileParameterDeclaration(&parameters);
+
+    compileCompositeCommand();
+
+    Procedure p(name, 0, n, parameters);
 }

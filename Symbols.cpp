@@ -15,6 +15,11 @@ const char* Symbol::getName() const
     return this->_name;
 }
 
+void Symbol::setName(const char* name)
+{
+    strcpy(this->_name, name);
+}
+
 unsigned char Symbol::getLevel() const
 {
     return this->_level;
@@ -55,20 +60,19 @@ ValueType Parameter::getType() const
     return this->_type;
 }
 
+void Parameter::setType(ValueType type)
+{
+    this->_type = type;
+}
 
-Procedure::Procedure(const char* name, unsigned char level, int nParams, ...)
+Procedure::Procedure(const char* name, unsigned char level, int nParams, Parameter* params)
 : Symbol(name, level)
 {
-    va_list parameters;
-    va_start(parameters, nParams);
-
     this->_nParameters = nParams;
     this->_parameters = (Parameter*)malloc(sizeof(Parameter) * nParams);
 
     for (int i = 0; i < nParams; i++)
-        this->_parameters[i] = va_arg(parameters, Parameter);
-
-    va_end(parameters);
+        this->_parameters[i] = params[i];
 }
 
 int Procedure::getParameterCount() const
@@ -81,8 +85,8 @@ const Parameter* Procedure::getParameters() const
     return this->_parameters;
 }
 
-template<typename... Values> Function::Function(const char* name, unsigned char level, ValueType type, int nParams, Values... params)
-: Procedure(name, level, nParams, params...)
+Function::Function(const char* name, unsigned char level, ValueType type, int nParams, Parameter* params)
+: Procedure(name, level, nParams, params)
 {
     this->_returnType = type;
 }

@@ -43,6 +43,11 @@ class Parser
 
         int _functionIndex = 0;
 
+        void deleteProcedure(const char*);
+
+        void deleteFunction(const char*);
+
+        void deleteVariable(const char*);
 
     public:
         /// Construtor
@@ -67,10 +72,10 @@ class Parser
         void compileWhile();
 
         /// Compila a declaração de parâmetros de um método
-        void compileParameterDeclaration();
+        int compileParameterDeclaration(Parameter**);
 
         /// Compila os parâmetros de uma chamada de função
-        void compileParameters();
+        int compileParameters();
 
         /// Compila um comando composto (começa em `begin', termina em `end')
         void compileCompositeCommand();
@@ -80,12 +85,6 @@ class Parser
 
         /// Compila uma expressão e retorna seu tipo
         ValueType compileExpression();
-
-        void deleteProcedure(const char*);
-
-        void deleteFunction(const char*);
-
-        void deleteVariable(const char*);
 };
 
 #endif // PARSER_HPP_INCLUDED

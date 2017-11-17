@@ -48,7 +48,7 @@
 	<cstdarg>
 	<cstdlib>
 
-1510920008 c:\users\u16182\desktop\mypreciouscompiler\include\symbols.hpp
+1510926507 c:\users\u16182\desktop\mypreciouscompiler\include\symbols.hpp
 
 1510920008 source:c:\users\u16182\desktop\mypreciouscompiler\lexer.cpp
 	"include/Lexer.hpp"
@@ -78,4 +78,15 @@
 	<cstdlib>
 
 1510777083 c:\users\user\documentos\projects\mypreciouscompiler\include\symbols.hpp
+
+1510926440 source:c:\users\u16182\desktop\mypreciouscompiler\parser.cpp
+	"include/Parser.hpp"
+	"include/Lexer.hpp"
+	<cstdlib>
+	<cstring>
+	<cstdio>
+
+1510926298 c:\users\u16182\desktop\mypreciouscompiler\include\parser.hpp
+	"Lexer.hpp"
+	"Symbols.hpp"
 
