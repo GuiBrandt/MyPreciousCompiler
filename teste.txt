@@ -1,6 +1,6 @@
 program teste;
 
-var a, b;
+var a : integer, b : integer;
 
 procedure test()
 begin

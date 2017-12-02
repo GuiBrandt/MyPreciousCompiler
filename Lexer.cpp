@@ -8,10 +8,12 @@
 
 /// Vetor de palavras reservadas
 char* Lexer::reserved[] = {
-    "if", "else", "var", "procedure", "function", "begin", "while",
-    "end", "program", "integer", "boolean", "+", "-", "/", "*", "mod", "and", "or",
-    "xor", "not", "=", "<>", ">", "<", ">=", "<=", "(", ")",
-    "[", "]", ":=", "write", "read", "true", "false", ",", ";", NULL
+    "if",  "else",    "var",     "procedure", "function", "begin", "while",
+    "end", "program", "integer", "boolean",   "+",        "-",     "/",
+    "*",   "mod",     "and",     "or",        "xor",      "not",   "=",
+    "<>",  ">",       "<",       ">=",        "<=",       "(",     ")",
+    "[",   "]",       ":=",      "write",     "read",     "true",  "false",
+    ",",   ";",       ":",       NULL
 };
 
 /**
@@ -19,9 +21,12 @@ char* Lexer::reserved[] = {
  *
  * \param filename Nome do arquivo a ser lido
  */
-Lexer::Lexer(const char* filename)
+Lexer::Lexer(const char* filename) throw (const char*)
 {
     _file = fopen(filename, "r");
+    if (_file == NULL)
+        throw "Arquivo inexistente";
+
     _integer = 0;
     _name = NULL;
 }
@@ -32,7 +37,7 @@ Lexer::Lexer(const char* filename)
  * \param token Palavra a ser analisada
  * \return O TokenType da palavra
  */
-TokenType Lexer::getTokenType(const char*& token) const
+TokenType Lexer::getTokenType(const char*& token) const throw ()
 {
     int i = 0;
     while(reserved[i]!= NULL){
@@ -52,13 +57,13 @@ TokenType Lexer::getTokenType(const char*& token) const
  *
  * \return O tipo da palavra lida
  */
-TokenType Lexer::nextToken()
+TokenType Lexer::nextToken() throw (const char*)
 {
     _integer = 0;
     _name = NULL;
 
 	if (!hasMoreTokens())
-		return UNKNOWN;
+		throw "EOF";
 
     char* temp;
     int temp_length, temp_used;
@@ -175,7 +180,7 @@ TokenType Lexer::nextToken()
  *
  * \return O tipo da última palavra lida do arquivo
  */
-TokenType Lexer::getToken()
+TokenType Lexer::getToken() throw ()
 {
 	if (_lastToken == -1)
 		return nextToken();
@@ -188,7 +193,7 @@ TokenType Lexer::getToken()
  *
  * \return True se houverem mais palavras e False se não
  */
-char Lexer::hasMoreTokens()
+char Lexer::hasMoreTokens() throw ()
 {
     char chr;
     do
@@ -210,7 +215,7 @@ char Lexer::hasMoreTokens()
  *
  * \return O último nome lido do arquivo
  */
-char* Lexer::getName() const
+char* Lexer::getName() const throw ()
 {
     return _name;
 }
@@ -220,7 +225,7 @@ char* Lexer::getName() const
  *
  * \return O último inteiro lido do arquivo
  */
-int Lexer::getValue() const
+int Lexer::getValue() const throw ()
 {
     return _integer;
 }

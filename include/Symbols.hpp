@@ -17,7 +17,6 @@ ValueType;
 class Symbol
 {
     public:
-
         /// Construtor
         Symbol(const char*, unsigned char);
 

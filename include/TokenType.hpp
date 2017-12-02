@@ -53,6 +53,7 @@ typedef enum
 
     COMMA,
     SEMICOLON,
+    COLON,
 
     NUMBER,
     NAME,

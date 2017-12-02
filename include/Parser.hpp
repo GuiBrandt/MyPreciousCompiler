@@ -24,11 +24,11 @@ class Parser
 
         Function getFunction(const char*) const;
 
-        void addVariable(Variable);
+        void addVariable(const Variable&);
 
-        void addProcedure(Procedure);
+        void addProcedure(const Procedure&);
 
-        void addFunction(Function);
+        void addFunction(const Function&);
 
         int _varSize = 100;
 
@@ -42,15 +42,19 @@ class Parser
 
         int _functionIndex = 0;
 
+        int _level = 0;
+
         void deleteProcedure(const char*);
 
         void deleteFunction(const char*);
 
         void deleteVariable(const char*);
 
+        void compileParameters(const Procedure*);
+
     public:
         /// Construtor
-        Parser(const char*);
+        Parser(const char*) throw (const char*);
 
         /// Compila o cabeçalho do programa
         void compileProgramBeginning();
@@ -82,8 +86,10 @@ class Parser
         /// Compila a declaração de parâmetros de um método
         int compileParameterDeclaration(Parameter**);
 
-        /// Compila os parâmetros de uma chamada de função
-        int compileParameters(const Procedure&);
+        /// Compila uma chamada de função/procedimento
+        void compileMethodCall();
+        ValueType compileFunctionCall();
+        void compileProcedureCall();
 
         /// Compila um comando composto (começa em `begin', termina em `end')
         void compileCompositeCommand();

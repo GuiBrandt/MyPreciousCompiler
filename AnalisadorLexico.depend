@@ -90,35 +90,35 @@
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512217738 source:d:\projetos\mypreciouscompiler\main.cpp
+1512224000 source:d:\projetos\mypreciouscompiler\main.cpp
 	"include/Lexer.hpp"
 
-1512216662 d:\projetos\mypreciouscompiler\include\lexer.hpp
+1512224094 d:\projetos\mypreciouscompiler\include\lexer.hpp
 	<cstdio>
 	"TokenType.hpp"
 
-1512217130 d:\projetos\mypreciouscompiler\include\tokentype.hpp
+1512223746 d:\projetos\mypreciouscompiler\include\tokentype.hpp
 
-1512214246 source:d:\projetos\mypreciouscompiler\symbols.cpp
+1512230198 source:d:\projetos\mypreciouscompiler\symbols.cpp
 	"include/Symbols.hpp"
 	<cstring>
 	<cstdarg>
 	<cstdlib>
 
-1512214246 d:\projetos\mypreciouscompiler\include\symbols.hpp
+1512230186 d:\projetos\mypreciouscompiler\include\symbols.hpp
 
-1512218476 source:d:\projetos\mypreciouscompiler\parser.cpp
+1512230900 source:d:\projetos\mypreciouscompiler\parser.cpp
 	"include/Parser.hpp"
 	"include/Lexer.hpp"
 	<cstdlib>
 	<cstring>
 	<cstdio>
 
-1512218488 d:\projetos\mypreciouscompiler\include\parser.hpp
+1512230540 d:\projetos\mypreciouscompiler\include\parser.hpp
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512218010 source:d:\projetos\mypreciouscompiler\lexer.cpp
+1512224110 source:d:\projetos\mypreciouscompiler\lexer.cpp
 	"include/Lexer.hpp"
 	<ctype.h>
 	<cstring>

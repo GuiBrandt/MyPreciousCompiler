@@ -12,25 +12,25 @@ class Lexer
     public:
 
         /// Construtor
-        Lexer(const char*);
+        Lexer(const char*) throw (const char*);
 
         /// Destrutor
         ~Lexer();
 
         /// Avança uma palavra no arquivo
-        TokenType nextToken();
+        TokenType nextToken() throw (const char*);
 
         /// Obtém a última palavra lida do arquivo
-        TokenType getToken();
+        TokenType getToken() throw ();
 
         /// Verifica se o arquivo ainda contém alguma palavra
-        char hasMoreTokens();
+        char hasMoreTokens() throw ();
 
         /// Obtém o último nome lido
-        char* getName() const;
+        char* getName() const throw ();
 
         /// Obtém o último inteiro lido
-        int getValue() const;
+        int getValue() const throw ();
 
     private:
 
@@ -50,7 +50,7 @@ class Lexer
         TokenType _lastToken = (TokenType)-1;
 
         /// Determina o tipo de uma palavra lida
-        TokenType getTokenType(const char*&) const;
+        TokenType getTokenType(const char*&) const throw ();
 };
 
 #endif

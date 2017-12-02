@@ -25,7 +25,6 @@ unsigned char Symbol::getLevel() const
     return this->_level;
 }
 
-
 Variable::Variable(const char* name, unsigned char level, ValueType type)
 : Symbol(name, level)
 {
@@ -47,7 +46,6 @@ Variable::Value Variable::getValue() const
 {
     return this->_value;
 }
-
 
 Parameter::Parameter(const char* name, unsigned char level, ValueType type)
 : Symbol(name, level)
