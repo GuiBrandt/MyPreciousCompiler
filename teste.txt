@@ -1,0 +1,25 @@
+program teste;
+
+var a, b;
+
+procedure test()
+begin
+	write 1;
+end;
+
+function test2(integer arg)
+begin
+	write arg;
+end;
+
+begin
+	read a;
+	read b;
+
+	if (a == 1)
+		test();
+	else
+	begin
+		write test2(b);
+	end;
+end;

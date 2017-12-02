@@ -12,7 +12,6 @@ class Parser
         /// Analisador léxico
         Lexer _lexer;
 
-
         Variable* _var;
 
         Procedure* _procedure;
@@ -57,13 +56,22 @@ class Parser
         void compileProgramBeginning();
 
         /// Compila uma lista de variáveis
-        void compileVariable();
+        void compileVariableDeclaration();
+
+        /// Compila uma atribuição de variável
+        void compileVariableAttribution();
 
         /// Compila um procedimento
         void compileProcedure();
 
         /// Compila uma função
         void compileFunction();
+
+        /// Compila uma chamada de escrita
+        void compileWrite();
+
+        /// Compila uma chamada de leitura
+        void compileRead();
 
         /// Compila um condicional
         void compileIf();
@@ -75,7 +83,7 @@ class Parser
         int compileParameterDeclaration(Parameter**);
 
         /// Compila os parâmetros de uma chamada de função
-        int compileParameters();
+        int compileParameters(const Procedure&);
 
         /// Compila um comando composto (começa em `begin', termina em `end')
         void compileCompositeCommand();

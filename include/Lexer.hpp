@@ -50,7 +50,7 @@ class Lexer
         TokenType _lastToken = (TokenType)-1;
 
         /// Determina o tipo de uma palavra lida
-        TokenType getTokenType(char*);
+        TokenType getTokenType(const char*&) const;
 };
 
 #endif

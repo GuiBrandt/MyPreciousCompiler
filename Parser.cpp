@@ -143,7 +143,7 @@ void Parser::deleteVariable(const char* name)
             break;
         }
     }
-    throw "Procedimento não encontrado";
+    throw "Variável não encontrada";
 }
 
 /**
@@ -156,7 +156,7 @@ void Parser::compileIf()
         throw "If esperado";
 
     ValueType type = compileExpression();
-    if(type != BOOLEAN)
+    if (type != tBOOLEAN)
         throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
@@ -187,7 +187,7 @@ void Parser::compileWhile()
         throw "While esperado";
 
     ValueType type = compileExpression();
-    if(type != BOOLEAN)
+    if(type != tBOOLEAN)
         throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
@@ -219,26 +219,28 @@ void Parser::compileCommand()
 {
     TokenType prox = _lexer.getToken();
 
-    if(prox == IF)
+    if (prox == IF)
         compileIf();
-    else if(prox == WHILE)
+    else if (prox == WHILE)
         compileWhile();
-    else if(prox == FUNCTION)
+    else if (prox == FUNCTION)
         compileFunction();
-    else if(prox == PROCEDURE)
+    else if (prox == PROCEDURE)
         compileProcedure();
-    else if(prox == NAME)
+    else if (prox == NAME)
     {
         prox = _lexer.nextToken();
+        const char* name = _lexer.getName();
+
         prox = _lexer.nextToken();
 
-        if(prox == EQUAL)
-            compileVariable();
-        else if(prox == OPEN_PARENTESIS)
-            {
-                prox = _lexer.getToken();
-                if(prox != CLOSE_PARENTESIS)
-                    compileParameters();
+        if (prox == SETTER)
+            compileVariableAttribution();
+        else if (prox == OPEN_PARENTESIS)
+        {
+            prox = _lexer.getToken();
+            if(prox != CLOSE_PARENTESIS)
+                compileParameters(getProcedure(name));
         }
         else
             throw "Esse comando não existe";
@@ -260,10 +262,15 @@ void Parser::compileProgramBeginning()
         throw "Nome do programa esperado";
 
     prox = _lexer.nextToken();
-    if(prox == VAR)
-        compileVariable();
+    if (prox == VAR)
+        compileVariableDeclaration();
 
     compileCompositeCommand();
+}
+
+void Parser::compileVariableDeclaration()
+{
+
 }
 
 /**
@@ -273,6 +280,7 @@ void Parser::compileProgramBeginning()
  */
 ValueType Parser::compileExpression()
 {
+    return tINTEGER;
 }
 
 /**
@@ -344,4 +352,20 @@ void Parser::compileProcedure()
     compileCompositeCommand();
 
     Procedure p(name, 0, n, parameters);
+}
+
+void Parser::compileFunction()
+{
+
+
+}
+
+void Parser::compileVariableAttribution()
+{
+
+}
+
+int Parser::compileParameters(const Procedure& method)
+{
+    return 0;
 }
