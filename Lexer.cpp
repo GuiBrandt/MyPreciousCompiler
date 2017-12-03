@@ -28,7 +28,7 @@ Lexer::Lexer(const char* filename) throw (const char*)
     _integer = 0;
     _name = NULL;
     _line = _lineAux = 1;
-    _column = _columnAux = 0;
+    _column = _columnAux = 1;
 }
 
 /**
@@ -253,7 +253,7 @@ char Lexer::hasMoreTokens() throw ()
             if (chr == '\n')
             {
                 _lineAux++;
-                _columnAux = 0;
+                _columnAux = 1;
             }
         }
     }

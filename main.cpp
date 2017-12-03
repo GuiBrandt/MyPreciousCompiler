@@ -5,12 +5,14 @@
 #include <cstdlib>
 #include <cstring>
 
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_YELLOW  "\x1b[33m"
-#define ANSI_COLOR_BLUE    "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RED     "\x1b[1;31m"
+#define ANSI_COLOR_GREEN   "\x1b[1;32m"
+#define ANSI_COLOR_YELLOW  "\x1b[1;33m"
+#define ANSI_COLOR_BLUE    "\x1b[1;34m"
+#define ANSI_COLOR_MAGENTA "\x1b[1;35m"
+#define ANSI_COLOR_TEAL    "\x1b[0;36m"
+#define ANSI_COLOR_CYAN    "\x1b[1;36m"
+#define ANSI_COLOR_GRAY    "\x1b[1;30m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 /**
@@ -27,12 +29,9 @@ void lexicalAnalysis(const char* filename)
         {
             TokenType tt = l.nextToken();
             printf(
-                ANSI_COLOR_GREEN "0x%02x  "
-                ANSI_COLOR_CYAN "0x%09x  "
-                ANSI_COLOR_YELLOW "%s"
-                ANSI_COLOR_RESET "\r\n",
+                ANSI_COLOR_GREEN "0x%02x  %s0x%08x  " ANSI_COLOR_RESET "%s" ANSI_COLOR_RESET "\r\n",
 
-                tt, l.getValue(), l.getName() != NULL ? l.getName() : ANSI_COLOR_RED "<NULL>");
+                tt, l.getValue() == 0 ? ANSI_COLOR_TEAL : ANSI_COLOR_CYAN, l.getValue(), l.getName() != NULL ? l.getName() : ANSI_COLOR_GRAY "<NULL>");
         }
     } catch (const char* e) {
         fprintf(stderr, ANSI_COLOR_RED "Erro: %s" ANSI_COLOR_RESET, e);
@@ -50,8 +49,8 @@ int main(int argc, char** argv)
 
     if (argc < 2 || argc > 3)
     {
-        printf("Sintaxe: lotr [-l|--lex] <nome do arquivo>");
-        printf("\r\n\r\n");
+        printf("Sintaxe: " ANSI_COLOR_YELLOW "lotr" ANSI_COLOR_TEAL " [-l|--lex] " ANSI_COLOR_GRAY " <nome do arquivo>");
+        printf(ANSI_COLOR_RESET "\r\n\r\n");
         printf("Se especificada a flag -l ou --lex, o compilador mostra também");
         printf(" a análise léxica feita do código.");
 
@@ -82,7 +81,7 @@ int main(int argc, char** argv)
 
             p.compileProgram();
 
-            printf(ANSI_COLOR_GREEN "Programa compilado com sucesso!" ANSI_COLOR_RESET "\r\n");
+            printf(ANSI_COLOR_YELLOW "Programa compilado com sucesso!" ANSI_COLOR_RESET "\r\n");
 
         } catch (const char* e) {
             fprintf(stderr, ANSI_COLOR_RED "Linha %d, Coluna %d: %s" ANSI_COLOR_RESET "\r\n\r\n", p.currentLine(), p.currentColumn(), e);
@@ -100,10 +99,10 @@ int main(int argc, char** argv)
             fprintf(stderr, "\r\n");
 
             int i;
-            for (i = 0; i <= p.currentColumn(); i++)
+            for (i = 0; i < p.currentColumn(); i++)
                 fprintf(stderr, " ");
 
-            fprintf(stderr, "^\r\n");
+            fprintf(stderr, ANSI_COLOR_RED "^" ANSI_COLOR_RESET "\r\n");
 
             return -2;
         }

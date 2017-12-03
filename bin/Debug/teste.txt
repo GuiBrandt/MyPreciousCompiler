@@ -3,17 +3,19 @@ program teste;
 var a : integer, b : integer;
 
 procedure test()
+var d : boolean;
 begin
-	write 1;
+	write 1 == 1 && d;
 end;
 
 function test2(arg : integer) : integer
+var c : integer;
 begin
-	write arg;
+	write arg + c;
 end;
 
 begin
-	a = 1 + true;
+	a = 1;
 
 	read a;
 	read b;

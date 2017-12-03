@@ -90,7 +90,7 @@
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512346292 source:d:\projetos\mypreciouscompiler\main.cpp
+1512347780 source:d:\projetos\mypreciouscompiler\main.cpp
 	"include/Lexer.hpp"
 	"include/Parser.hpp"
 	<ctype.h>
@@ -111,7 +111,7 @@
 
 1512236888 d:\projetos\mypreciouscompiler\include\symbols.hpp
 
-1512327558 source:d:\projetos\mypreciouscompiler\parser.cpp
+1512346950 source:d:\projetos\mypreciouscompiler\parser.cpp
 	"include/Parser.hpp"
 	"include/Lexer.hpp"
 	<cstdlib>
@@ -125,7 +125,7 @@
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512346230 source:d:\projetos\mypreciouscompiler\lexer.cpp
+1512346730 source:d:\projetos\mypreciouscompiler\lexer.cpp
 	"include/Lexer.hpp"
 	<ctype.h>
 	<cstring>

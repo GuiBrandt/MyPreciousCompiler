@@ -955,6 +955,10 @@ void Parser::compileProcedure()
     addProcedure(p);
 
     prox = _lexer.getToken();
+
+    if (prox == VAR)
+        compileVariableDeclaration();
+
     compileCompositeCommand();
 
     decreaseLevel();
@@ -1008,6 +1012,10 @@ void Parser::compileFunction()
     addFunction(f);
 
     prox = _lexer.nextToken();
+
+    if (prox == VAR)
+        compileVariableDeclaration();
+
     compileCompositeCommand();
 
     decreaseLevel();
