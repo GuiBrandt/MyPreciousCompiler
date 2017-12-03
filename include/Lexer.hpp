@@ -20,6 +20,9 @@ class Lexer
         /// Avança uma palavra no arquivo
         TokenType nextToken() throw (const char*);
 
+        /// Lê um caractere do arquivo
+        char readChar();
+
         /// Obtém a última palavra lida do arquivo
         TokenType getToken() throw ();
 
@@ -31,6 +34,12 @@ class Lexer
 
         /// Obtém o último inteiro lido
         int getValue() const throw ();
+
+        /// Obtém a linha atual do arquivo sendo lida pelo analisador léxico
+        int currentLine() const throw ();
+
+        /// Obtém a coluna atual do arquivo sendo lida pelo analisador léxico
+        int currentColumn() const throw ();
 
     private:
 
@@ -45,6 +54,12 @@ class Lexer
 
         /// Último inteiro lido
         int _integer;
+
+        /// Linha atual do lexer
+        int _line;
+
+        /// Coluna atual do lexer
+        int _column;
 
         /// Última palavra lida
         TokenType _lastToken = (TokenType)-1;

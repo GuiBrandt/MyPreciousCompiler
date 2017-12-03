@@ -6,6 +6,7 @@
 
 Symbol::Symbol(const char* name, unsigned char level)
 {
+    memset(this->_name, 0, 256);
     strcpy(this->_name, name);
     this->_level = level;
 }

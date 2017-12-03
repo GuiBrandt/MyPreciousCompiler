@@ -27,13 +27,16 @@ void lexerTest(const char* filename)
  */
 int main(int argc, char** argv)
 {
-    lexerTest("teste.txt");
+    //lexerTest("teste.txt");
     Parser p("teste.txt");
 
     try {
-        printf("%d", p.compileExpression());
+        p.compileProgram();
+
+        printf("Programa compilado com sucesso!");
     } catch (const char* e) {
-        printf(e);
+        fprintf(stderr, "Linha %d, Coluna %d: %s", p.currentLine(), p.currentColumn(), e);
     }
+
     return 0;
 }

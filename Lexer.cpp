@@ -8,12 +8,10 @@
 
 /// Vetor de palavras reservadas
 char* Lexer::reserved[] = {
-    "if",  "else",    "var",     "procedure", "function", "begin", "while",
-    "end", "program", "integer", "boolean",   "+",        "-",     "/",
-    "*",   "%",       "&&",      "||",        "^",        "!",     "==",
-    "<>",  ">",       "<",       ">=",        "<=",       "(",     ")",
-    "=",   "write",   "read",    "true",      "false",    ",",     ";",
-    ":",   NULL
+    "if", "then", "else", "var", "procedure", "function", "begin", "while",
+    "do", "end", "program", "integer", "boolean", "+", "-", "/", "*", "%",
+    "&&", "||", "^", "!", "==", "!=", ">", "<", ">=", "<=", "(", ")", "=",
+    "write", "read", "true", "false", ",", ";", ":", NULL
 };
 
 /**
@@ -29,6 +27,24 @@ Lexer::Lexer(const char* filename) throw (const char*)
 
     _integer = 0;
     _name = NULL;
+    _line = 1;
+    _column = 0;
+}
+
+/**
+ * Obtém a linha do arquivo sendo lida pelo analisador léxico
+ */
+int Lexer::currentLine() const throw ()
+{
+    return _line;
+}
+
+/**
+ * Obtém a coluna do arquivo sendo lida pelo analisador léxico
+ */
+int Lexer::currentColumn() const throw ()
+{
+    return _column;
 }
 
 /**
@@ -54,6 +70,18 @@ TokenType Lexer::getTokenType(const char*& token) const throw ()
 }
 
 /**
+ * Lê um caractere do arquivo e avança uma coluna
+ */
+char Lexer::readChar()
+{
+    char c = (char)fgetc(_file);
+
+    _column++;
+
+    return (char)c;
+}
+
+/**
  * Avança uma palavra no arquivo
  *
  * \return O tipo da palavra lida
@@ -64,12 +92,12 @@ TokenType Lexer::nextToken() throw (const char*)
     _name = NULL;
 
 	if (!hasMoreTokens())
-		throw "EOF";
+		return END_OF_FILE;
 
     char* temp;
     int temp_length, temp_used;
 
-    char chr = (char)fgetc(_file);
+    char chr = readChar();
 
     if (isalpha(chr))
     {
@@ -91,14 +119,16 @@ TokenType Lexer::nextToken() throw (const char*)
             }
 
             temp[temp_used++] = chr;
-            chr = (char)fgetc(_file);
+            chr = readChar();
         }
         while (isalnum(chr) && chr != EOF);
 
         ungetc(chr, _file);
+        _column--;
 
         temp[temp_used] = '\0';
         TokenType r = getTokenType((const char*&)temp);
+
         if (r == NAME)
             _name = temp;
         else
@@ -127,10 +157,12 @@ TokenType Lexer::nextToken() throw (const char*)
                 temp = a;
             }
             temp[temp_used++] = chr;
-            chr = (char)fgetc(_file);
+            chr = readChar();
         }
         while (isdigit(chr));
+
         ungetc(chr, _file);
+        _column--;
 
         temp[temp_used] = '\0';
 
@@ -161,14 +193,20 @@ TokenType Lexer::nextToken() throw (const char*)
             }
 
             temp[temp_used++] = chr;
+
             chr = fgetc(_file);
+
+            if (chr == ')' || chr == ';' || chr == ',')
+                break;
         }
         while (!isalnum(chr) && !isspace(chr) && chr != EOF);
 
         ungetc(chr, _file);
+        _column--;
 
         temp[temp_used] = '\0';
         TokenType t = getTokenType((const char*&)temp);
+
         free(temp);
 
         _lastToken = t;
@@ -199,11 +237,21 @@ char Lexer::hasMoreTokens() throw ()
     char chr;
     do
     {
-        chr = fgetc(_file);
+        chr = readChar();
         if (chr != EOF && !isspace(chr))
         {
         	ungetc(chr, _file);
+        	_column--;
+
             return true;
+        }
+        else
+        {
+            if (chr == '\n')
+            {
+                _line++;
+                _column = 0;
+            }
         }
     }
     while (chr != EOF);

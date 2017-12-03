@@ -52,6 +52,12 @@ class Parser
 
         void deleteVariable(const char*);
 
+        char hasProcedure(const char*);
+
+        char hasFunction(const char*);
+
+        char hasVariable(const char*);
+
         void compileParameters(const Procedure*);
 
         void increaseLevel();
@@ -61,6 +67,12 @@ class Parser
     public:
         /// Construtor
         Parser(const char*) throw (const char*);
+
+        /// Obtém a linha atual sendo compilada
+        int currentLine() const throw ();
+
+        /// Obtém a coluna atual do arquivo sendo lida pelo analisador léxico
+        int currentColumn() const throw ();
 
         /// Compila o cabeçalho do programa
         void compileProgram();

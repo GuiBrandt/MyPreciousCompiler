@@ -7,12 +7,14 @@
 typedef enum
 {
     IF,
+    THEN,
     ELSE,
     VAR,
     PROCEDURE,
     FUNCTION,
     BEGIN,
     WHILE,
+    DO,
     END,
     PROGRAM,
 
@@ -54,6 +56,7 @@ typedef enum
 
     NUMBER,
     NAME,
+    END_OF_FILE,
     UNKNOWN
 } TokenType;
 

@@ -22,6 +22,22 @@ Parser::Parser(const char* filename) throw (const char*) : _lexer(filename)
 }
 
 /**
+ * Obtém a linha do arquivo sendo lida pelo compilador
+ */
+int Parser::currentLine() const throw ()
+{
+    return _lexer.currentLine();
+}
+
+/**
+ * Obtém a coluna do arquivo sendo lida pelo compilador
+ */
+int Parser::currentColumn() const throw ()
+{
+    return _lexer.currentColumn();
+}
+
+/**
  * Obtém uma variável
  */
 Variable Parser::getVariable(const char* name) const
@@ -32,9 +48,9 @@ Variable Parser::getVariable(const char* name) const
     int i;
     for (i = 0; i < _varCount; i++)
     {
-        if (_level - _var[i].getLevel() < _level - level && (_var[i].getName(), name) == 0)
+        if (_level - _var[i].getLevel() < _level - level && strcmp(_var[i].getName(), name) == 0)
         {
-            *r = _var[i];
+            r = &_var[i];
             level = _var[i].getLevel();
         }
     }
@@ -58,7 +74,7 @@ Procedure Parser::getProcedure(const char* name) const
     {
         if (_level - _procedure[i].getLevel() < _level - level && strcmp(_procedure[i].getName(), name) == 0)
         {
-            *r = _procedure[i];
+            r = &_procedure[i];
             level = _procedure[i].getLevel();
         }
     }
@@ -82,7 +98,7 @@ Function Parser::getFunction(const char* name) const
     {
         if (_level - _function[i].getLevel() < _level - level && strcmp(_function[i].getName(), name) == 0)
         {
-            *r = _function[i];
+            r = &_function[i];
             level = _function[i].getLevel();
         }
     }
@@ -245,6 +261,51 @@ void Parser::deleteVariable(const char* name)
 }
 
 /**
+ * Verifica se um procedimento existe
+ *
+ * \param name Nome do procedimento
+ */
+char Parser::hasProcedure(const char* name)
+{
+    int i;
+    for (i = 0; i < _procedureCount; i++)
+        if (strcmp(_procedure[i].getName(), name) == 0)
+            return 1;
+
+    return 0;
+}
+
+/**
+ * Verifica se uma função existe
+ *
+ * \param name Nome da função
+ */
+char Parser::hasFunction(const char* name)
+{
+    int i;
+    for (i = 0; i < _functionCount; i++)
+        if (strcmp(_function[i].getName(), name) == 0)
+            return 1;
+
+    return 0;
+}
+
+/**
+ * Verifica se uma variável existe
+ *
+ * \param name Nome da variável
+ */
+char Parser::hasVariable(const char* name)
+{
+    int i;
+    for (i = 0; i < _varCount; i++)
+        if (strcmp(_var[i].getName(), name) == 0)
+            return 1;
+
+    return 0;
+}
+
+/**
  * Aumenta o nível
  */
 void Parser::increaseLevel()
@@ -295,15 +356,22 @@ void Parser::compileProgram()
 
     if (prox == VAR)
         compileVariableDeclaration();
-    else while (prox == PROCEDURE || prox == FUNCTION)
+
+    prox = _lexer.getToken();
+    while (prox == PROCEDURE || prox == FUNCTION)
     {
         if (prox == PROCEDURE)
             compileProcedure();
         else
             compileFunction();
+
+        prox = _lexer.getToken();
     }
 
     compileCompositeCommand();
+
+    if (_lexer.hasMoreTokens())
+        throw "Fim de arquivo esperado";
 }
 
 /**
@@ -359,16 +427,20 @@ void Parser::compileCompositeCommand()
 
     prox = _lexer.nextToken();
 
-    while ((prox = _lexer.getToken()) != END)
+    while (prox != END)
+    {
         compileCommand();
+        prox = _lexer.getToken();
+    }
 
+    prox = _lexer.nextToken();
     if (prox != SEMICOLON)
         throw "';' esperado";
 
-    _lexer.nextToken();
-
     // Desce um nível
     decreaseLevel();
+
+    prox = _lexer.nextToken();
 }
 
 /**
@@ -388,19 +460,63 @@ void Parser::compileCommand()
         compileProcedure();
     else if (prox == NAME)
     {
-        try {
+        if (hasFunction(_lexer.getName()) || hasProcedure(_lexer.getName()))
             compileMethodCall();
-        }
-
-        // Não é chamada de método
-        catch (const char* e)
-        {
-            getVariable(_lexer.getName());
+        else
             compileVariableAttribution();
-        }
+
     }
+    else if (prox == WRITE)
+        compileWrite();
+    else if (prox == READ)
+        compileRead();
+    else if (prox == END_OF_FILE)
+        throw "Fim de arquivo inesperado";
     else
         throw "Token inesperado.";
+}
+
+/**
+ * Compila uma chamada de escrita
+ */
+void Parser::compileWrite()
+{
+    TokenType prox = _lexer.getToken();
+
+    if (prox != WRITE)
+        throw "'write' esperado";
+
+    prox = _lexer.nextToken();
+    compileExpression();
+
+    prox = _lexer.getToken();
+    if (prox != SEMICOLON)
+        throw "';' esperado";
+
+    _lexer.nextToken();
+}
+
+/**
+ * Compila uma chamada de leitura
+ */
+void Parser::compileRead()
+{
+    TokenType prox = _lexer.getToken();
+
+    if (prox != READ)
+        throw "'read' esperado";
+
+    prox = _lexer.nextToken();
+    if (prox != NAME)
+        throw "Nome esperado";
+
+    getVariable(_lexer.getName());
+
+    prox = _lexer.nextToken();
+    if (prox != SEMICOLON)
+        throw "';' esperado";
+
+    _lexer.nextToken();
 }
 
 /**
@@ -459,6 +575,7 @@ ValueType Parser::compileExpression()
     std::stack<TokenType> symbolStack;
 
     bool hasLeftValue = false;
+    int hasOpenParentesis = 0;
 
     for (
         prox = _lexer.getToken();
@@ -466,7 +583,7 @@ ValueType Parser::compileExpression()
         prox == TRUE     || prox == FALSE           ||
         prox == NUMBER   || prox == NAME            ||
         isoperator(prox) || prox == OPEN_PARENTESIS ||
-        prox == CLOSE_PARENTESIS;
+        (prox == CLOSE_PARENTESIS && hasOpenParentesis);
 
         prox = _lexer.nextToken()
     ) {
@@ -476,6 +593,7 @@ ValueType Parser::compileExpression()
             resultVector.push_back(INTEGER);
             hasLeftValue = true;
         }
+
         else if (prox == TRUE || prox == FALSE)
         {
             resultVector.push_back(BOOLEAN);
@@ -485,17 +603,28 @@ ValueType Parser::compileExpression()
         {
             ValueType t;
 
+            const char* name = _lexer.getName();
+
             try {
-                getProcedure(_lexer.getName());
-                throw "Expressão inválida: Procedimento não retorna um valor.";
+                getProcedure(name);
+                t = (ValueType)-1;
             } catch (const char* e0) {
                 try {
-                    t = compileFunctionCall();
+                    getFunction(name);
+                    t = (ValueType)-2;
                 } catch (const char* e1) {
-                    Variable resultVector = getVariable(_lexer.getName());
+                    if (_lexer.getToken() != NAME)
+                        throw e1;
+
+                    Variable resultVector = getVariable(name);
                     t = resultVector.getType();
                 }
             }
+
+            if (t == (ValueType)-2)
+                compileFunctionCall();
+            else if (t == (ValueType)-1)
+                throw "Expressão inválida: Procedimento não retorna um valor.";
 
             if (t == tINTEGER)
                 resultVector.push_back(INTEGER);
@@ -508,6 +637,9 @@ ValueType Parser::compileExpression()
         // Se não for valor, deve ser um operador
         else
         {
+            if (prox == OPEN_PARENTESIS)
+                hasOpenParentesis++;
+
             if (!hasLeftValue && (prox == SUM || prox == SUBTRACT))
             {
                 if (prox == SUBTRACT)
@@ -528,8 +660,11 @@ ValueType Parser::compileExpression()
 
                 if (op != OPEN_PARENTESIS)
                     resultVector.push_back(op);
-                else if (prox == CLOSE_PARENTESIS)
-                    break;
+                else {
+                    hasOpenParentesis--;
+                    if (prox == CLOSE_PARENTESIS)
+                        break;
+                }
             }
 
             hasLeftValue = false;
@@ -652,15 +787,15 @@ ValueType Parser::compileExpression()
             if (a != b)
                 throw "Não é possível comparar os tipos Integer e Boolean";
 
-            // O resultado de um comparador é sempre boolean
+            // O resultado de um comparador é sempre booleanp
             valueStack.push(BOOLEAN);
         }
+        else
+            throw "Expressão inválida";
     }
 
     if (valueStack.size() != 1)
         throw "Expressão inválida";
-
-    _lexer.nextToken();
 
     return valueStack.top() == INTEGER ? tINTEGER : tBOOLEAN;
 }
@@ -675,17 +810,13 @@ void Parser::compileIf()
         throw "If esperado";
 
     prox = _lexer.nextToken();
-    if (prox != OPEN_PARENTESIS)
-        throw "'(' esperado";
-
-    prox = _lexer.nextToken();
     ValueType type = compileExpression();
     if (type != tBOOLEAN)
         throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
-    if (prox != CLOSE_PARENTESIS)
-        throw "')' esperado";
+    if (prox != THEN)
+        throw "'then' esperado";
 
     prox = _lexer.nextToken();
     if (prox == BEGIN)
@@ -715,17 +846,13 @@ void Parser::compileWhile()
         throw "While esperado";
 
     prox = _lexer.nextToken();
-    if (prox != OPEN_PARENTESIS)
-        throw "'(' esperado";
-
-    prox = _lexer.nextToken();
     ValueType type = compileExpression();
     if (type != tBOOLEAN)
         throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
-    if (prox != CLOSE_PARENTESIS)
-        throw "')' esperado";
+    if (prox != DO)
+        throw "'do' esperado";
 
     prox = _lexer.nextToken();
     if (prox == BEGIN)
@@ -739,7 +866,7 @@ void Parser::compileWhile()
  */
 int Parser::compileParameterDeclaration(Parameter** params)
 {
-    TokenType prox = _lexer.nextToken();
+    TokenType prox = _lexer.getToken();
     if (prox != OPEN_PARENTESIS)
         throw "Abre parênteses esperado";
 
@@ -748,25 +875,19 @@ int Parser::compileParameterDeclaration(Parameter** params)
     int sz = 8;
     *params = (Parameter*)malloc(sz * sizeof(Parameter));
 
-    while(prox != CLOSE_PARENTESIS)
-    {
-        prox = _lexer.nextToken();
-        if (prox != INTEGER && prox != BOOLEAN)
-            throw "Tipo do parâmetro esperado";
+    prox = _lexer.nextToken();
 
+    while (prox != CLOSE_PARENTESIS)
+    {
         if (n >= sz)
         {
             Parameter* aux = (Parameter*)malloc(sizeof(Parameter) * sz * 2);
-            memcpy(aux, *params, sz);
+            memcpy(aux, *params, sz * sizeof(Parameter));
             sz *= 2;
 
             free(*params);
             *params = aux;
         }
-
-        (*params)[n].setType(prox == INTEGER ? tINTEGER : tBOOLEAN);
-
-        prox = _lexer.nextToken();
 
         if (prox != NAME)
             throw "Nome do parâmetro esperado";
@@ -775,12 +896,27 @@ int Parser::compileParameterDeclaration(Parameter** params)
         (*params)[n].setLevel(_level);
 
         prox = _lexer.nextToken();
+        if (prox != COLON)
+            throw "':' esperado";
 
-        if(prox != COMMA && prox != CLOSE_PARENTESIS)
-            throw "Vírgula esperada";
+        prox = _lexer.nextToken();
+        if (prox != INTEGER && prox != BOOLEAN)
+            throw "Tipo do parâmetro esperado";
+
+        (*params)[n].setType(prox == INTEGER ? tINTEGER : tBOOLEAN);
+
+        prox = _lexer.nextToken();
+
+        if (prox != COMMA && prox != CLOSE_PARENTESIS)
+            throw "')' esperado";
 
         n++;
+
+        if (prox == COMMA)
+            prox = _lexer.nextToken();
     }
+
+    _lexer.nextToken();
 
     return n;
 }
@@ -801,13 +937,27 @@ void Parser::compileProcedure()
 
     const char* name = _lexer.getName();
 
+    prox = _lexer.nextToken();
+
     Parameter* parameters;
     int n = compileParameterDeclaration(&parameters);
 
+    increaseLevel();
+
+    int i;
+    for (i = 0; i < n; i++)
+    {
+        Variable v(parameters[i].getName(), _level, parameters[i].getType());
+        addVariable(v);
+    }
+
+    Procedure p(name, _level - 1, n, parameters);
+    addProcedure(p);
+
+    prox = _lexer.getToken();
     compileCompositeCommand();
 
-    Procedure p(name, _level, n, parameters);
-    addProcedure(p);
+    decreaseLevel();
 }
 
 /**
@@ -831,7 +981,7 @@ void Parser::compileFunction()
     Parameter* parameters;
     int n = compileParameterDeclaration(&parameters);
 
-    prox = _lexer.nextToken();
+    prox = _lexer.getToken();
     if (prox != COLON)
         throw "':' esperado.";
 
@@ -845,11 +995,22 @@ void Parser::compileFunction()
     else
         throw "Tipo da função esperado.";
 
+    increaseLevel();
+
+    int i;
+    for (i = 0; i < n; i++)
+    {
+        Variable v(parameters[i].getName(), _level, parameters[i].getType());
+        addVariable(v);
+    }
+
+    Function f(name, _level - 1, type, n, parameters);
+    addFunction(f);
+
     prox = _lexer.nextToken();
     compileCompositeCommand();
 
-    Function f(name, _level, type, n, parameters);
-    addFunction(f);
+    decreaseLevel();
 }
 
 /**
@@ -865,7 +1026,7 @@ void Parser::compileVariableAttribution()
 
     prox = _lexer.nextToken();
     if (prox != SETTER)
-        throw "':=' esperado.";
+        throw "'=' esperado.";
 
     prox = _lexer.nextToken();
     ValueType t = compileExpression();
@@ -873,9 +1034,11 @@ void Parser::compileVariableAttribution()
     if (t != v.getType())
         throw "Tipo inválido para a variável.";
 
-    prox = _lexer.nextToken();
+    prox = _lexer.getToken();
     if (prox != SEMICOLON)
         throw "';' esperado.";
+
+    _lexer.nextToken();
 }
 
 /**
@@ -889,13 +1052,14 @@ void Parser::compileMethodCall()
 
     const char* name = _lexer.getName();
 
-    try {
-        getFunction(name);
+    if (hasFunction(name))
         compileFunctionCall();
-    } catch (const char* e) {
-        getProcedure(name);
+    else
         compileProcedureCall();
-    }
+
+    prox = _lexer.nextToken();
+    if (prox != SEMICOLON)
+        throw "';' esperado";
 }
 
 /**
@@ -909,6 +1073,7 @@ void Parser::compileParameters(const Procedure* method)
     TokenType prox = _lexer.getToken();
     if (prox == SEMICOLON)
         return;
+
     else if (prox != OPEN_PARENTESIS)
         throw "'(' esperado.";
 
@@ -920,6 +1085,7 @@ void Parser::compileParameters(const Procedure* method)
         ValueType type = compileExpression();
 
         prox = _lexer.getToken();
+
         if (prox == COMMA)
             prox = _lexer.nextToken();
         else if (prox != CLOSE_PARENTESIS)
@@ -933,11 +1099,6 @@ void Parser::compileParameters(const Procedure* method)
 
         n++;
     }
-
-    prox = _lexer.nextToken();
-    if (prox != SEMICOLON)
-        throw "';' esperado";
-
 }
 
 /**

@@ -7,19 +7,17 @@ begin
 	write 1;
 end;
 
-function test2(integer arg)
+function test2(arg : integer) : integer
 begin
 	write arg;
 end;
 
 begin
+	a = 1;
+
 	read a;
 	read b;
 
-	if (a == 1)
-		test();
-	else
-	begin
-		write test2(b);
-	end;
+	if a == 1 then write b;
+	else write test2(b);
 end;
