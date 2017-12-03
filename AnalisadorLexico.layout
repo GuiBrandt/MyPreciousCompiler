@@ -2,29 +2,52 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="LEXER.CPP" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="506" topLine="0" />
+			<Cursor1 position="678" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="include\LEXER.HPP" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="476" topLine="6" />
+		</Cursor>
+	</File>
+	<File name="include\PARSER.HPP" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1084" topLine="24" />
+		</Cursor>
+	</File>
+	<File name="include\SYMBOLS.HPP" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2565" topLine="93" />
+		</Cursor>
+	</File>
+	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="536" topLine="15" />
 		</Cursor>
 	</File>
 	<File name="include\TokenType.hpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="178" topLine="22" />
+			<Cursor1 position="279" topLine="22" />
 		</Cursor>
 	</File>
-	<File name="SYMBOLS.CPP" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="PARSER.CPP" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="500" topLine="0" />
+			<Cursor1 position="11093" topLine="81" />
 		</Cursor>
+		<Folding>
+			<Collapse line="528" />
+			<Collapse line="542" />
+			<Collapse line="806" />
+			<Collapse line="842" />
+			<Collapse line="867" />
+			<Collapse line="927" />
+		</Folding>
 	</File>
-	<File name="include\SYMBOLS.HPP" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="SYMBOLS.CPP" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="681" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="PARSER.CPP" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="231" topLine="737" />
+			<Cursor1 position="186" topLine="0" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>
