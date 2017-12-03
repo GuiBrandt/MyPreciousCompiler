@@ -425,7 +425,6 @@ char isoperator(TokenType tokenType)
  */
 ValueType Parser::compileExpression()
 {
-    ValueType type;
     TokenType prox;
 
     // TokenType para '-' unário prefixado, não faz sentido existir para o
@@ -435,29 +434,29 @@ ValueType Parser::compileExpression()
     // Prioridades
     static std::map<TokenType, int> priority = {
         { OPEN_PARENTESIS,   4 },
-        { AND,               3 },
-        { OR,                3 },
-        { XOR,               3 },
         { NOT,               3 },
-        { MULTIPLY,          2 },
-        { DIVIDE,            2 },
-        { NEGATIVE,          2 },
-        { SUM,               1 },
-        { SUBTRACT,          1 },
-        { EQUAL,             0 },
-        { DIFFERENT,         0 },
-        { GREATER_OR_EQUAL,  0 },
-        { SMALLER_OR_EQUAL,  0 },
-        { SMALLER_THAN,      0 },
-        { GREATER_THAN,      0 },
+        { MULTIPLY,          3 },
+        { DIVIDE,            3 },
+        { NEGATIVE,          3 },
+        { SUM,               2 },
+        { SUBTRACT,          2 },
+        { EQUAL,             1 },
+        { DIFFERENT,         1 },
+        { GREATER_OR_EQUAL,  1 },
+        { SMALLER_OR_EQUAL,  1 },
+        { SMALLER_THAN,      1 },
+        { GREATER_THAN,      1 },
+        { AND,               0 },
+        { OR,                0 },
+        { XOR,               0 },
         { CLOSE_PARENTESIS, -1 }
     };
 
     // Vetor com a sequência posfixa
-    std::vector<TokenType> v;
+    std::vector<TokenType> resultVector;
 
     // Pilha usada como intermediário para os operadores
-    std::stack<TokenType> s;
+    std::stack<TokenType> symbolStack;
 
     bool hasLeftValue = false;
 
@@ -474,12 +473,12 @@ ValueType Parser::compileExpression()
         // Se for um valor, seu tipo é adicionado direto ao vetor
         if (prox == NUMBER)
         {
-            v.push_back(INTEGER);
+            resultVector.push_back(INTEGER);
             hasLeftValue = true;
         }
         else if (prox == TRUE || prox == FALSE)
         {
-            v.push_back(BOOLEAN);
+            resultVector.push_back(BOOLEAN);
             hasLeftValue = true;
         }
         else if (prox == NAME)
@@ -493,15 +492,15 @@ ValueType Parser::compileExpression()
                 try {
                     t = compileFunctionCall();
                 } catch (const char* e1) {
-                    Variable v = getVariable(_lexer.getName());
-                    t = v.getType();
+                    Variable resultVector = getVariable(_lexer.getName());
+                    t = resultVector.getType();
                 }
             }
 
             if (t == tINTEGER)
-                v.push_back(INTEGER);
+                resultVector.push_back(INTEGER);
             else
-                v.push_back(BOOLEAN);
+                resultVector.push_back(BOOLEAN);
 
             hasLeftValue = true;
         }
@@ -512,23 +511,23 @@ ValueType Parser::compileExpression()
             if (!hasLeftValue && (prox == SUM || prox == SUBTRACT))
             {
                 if (prox == SUBTRACT)
-                    v.push_back(NEGATIVE);
+                    resultVector.push_back(NEGATIVE);
                 else
                     continue;   // '+' prefixado é inútil
             }
 
             // Esvazia a pilha enquanto a prioridade do que estiver no topo for
             // maior que a do operador atual
-            while (s.size() > 0 && (
-                s.top() == OPEN_PARENTESIS ?
+            while (symbolStack.size() > 0 && (
+                symbolStack.top() == OPEN_PARENTESIS ?
                     prox == CLOSE_PARENTESIS :
-                        priority[s.top()] >= priority[prox])
+                        priority[symbolStack.top()] >= priority[prox])
             ) {
-                TokenType op = s.top();
-                s.pop();
+                TokenType op = symbolStack.top();
+                symbolStack.pop();
 
                 if (op != OPEN_PARENTESIS)
-                    v.push_back(op);
+                    resultVector.push_back(op);
                 else if (prox == CLOSE_PARENTESIS)
                     break;
             }
@@ -538,27 +537,132 @@ ValueType Parser::compileExpression()
             // A não ser que seja um fecha parêntesis, que não aparece, coloca
             // o operador na pilha
             if (prox != CLOSE_PARENTESIS)
-                s.push(prox);
+                symbolStack.push(prox);
         }
     }
 
     // Esvazia o que sobrou na pilha
-    while (s.size() > 0)
+    while (symbolStack.size() > 0)
     {
-        TokenType op = s.top();
-        s.pop();
+        TokenType op = symbolStack.top();
+        symbolStack.pop();
 
         if (op != OPEN_PARENTESIS && op != CLOSE_PARENTESIS)
-            v.push_back(op);
+            resultVector.push_back(op);
     }
 
+    // Pilha de valores
+    std::stack<TokenType> valueStack;
+
     unsigned int i;
-    for (i = 0; i < v.size(); i++)
-        printf("%02x\r\n", v[i]);
+    for (i = 0; i < resultVector.size(); i++)
+    {
+        if (resultVector[i] == INTEGER || resultVector[i] == BOOLEAN)
+            valueStack.push(resultVector[i]);
+
+        // Operador de '-' unário
+        else if (resultVector[i] == NEGATIVE)
+        {
+            if (valueStack.empty())
+                throw "Expressão inválida";
+
+            if (valueStack.top() != INTEGER)
+                throw "Não é possível aplicar '-' ao tipo Boolean";
+
+            // Teoricamente aqui ele tira um da pilha e põe outro, mas como
+            // não tem valores ia só tirar INTEGER e colocar de novo.
+            // Desnecessauro.
+        }
+
+        // Operador de negação lógico
+        else if (resultVector[i] == NOT)
+        {
+            if (valueStack.empty())
+                throw "Expressão inválida";
+
+            if (valueStack.top() != BOOLEAN)
+                throw "Não é possível aplicar '!' ao tipo Boolean";
+
+            // Teoricamente aqui ele tira um da pilha e põe outro, mas como
+            // não tem valores ia só tirar BOOLEAN e colocar de novo.
+            // Desnecessauro 2.
+        }
+
+        // Aritméticos
+        else if ((int)resultVector[i] >= (int)SUM &&
+                 (int)resultVector[i] <= (int)MOD)
+        {
+            if (valueStack.size() < 2)
+                throw "Expressão inválida";
+
+            TokenType a, b;
+
+            a = valueStack.top();
+            valueStack.pop();
+
+            b = valueStack.top();
+            valueStack.pop();
+
+            if (a != INTEGER || b != INTEGER)
+                throw "Não é possível usar operadores aritméticos com o tipo Boolean";
+
+            // O resultado é sempre inteiro
+            valueStack.push(INTEGER);
+        }
+
+        // Lógicos
+        else if ((int)resultVector[i] >= (int)AND &&
+                 (int)resultVector[i] <= (int)XOR)
+        {
+            if (valueStack.size() < 2)
+                throw "Expressão inválida";
+
+            TokenType a, b;
+
+            a = valueStack.top();
+            valueStack.pop();
+
+            b = valueStack.top();
+            valueStack.pop();
+
+            if (a != BOOLEAN || b != BOOLEAN)
+                throw "Não é possível usar operadores lógicos com o tipo Integer";
+
+            // O resultado é sempre booleano
+            valueStack.push(BOOLEAN);
+        }
+
+        // Comparadores
+        else if ((int)resultVector[i] >= (int)EQUAL &&
+                 (int)resultVector[i] <= (int)SMALLER_OR_EQUAL)
+        {
+            if (valueStack.size() < 2)
+                throw "Expressão inválida";
+
+            TokenType a, b;
+
+            a = valueStack.top();
+            valueStack.pop();
+
+            b = valueStack.top();
+            valueStack.pop();
+
+            // Se forem tipos diferentes, um é integer e outro é boolean com
+            // certeza, e isso tá errado.
+            if (a != b)
+                throw "Não é possível comparar os tipos Integer e Boolean";
+
+            // O resultado de um comparador é sempre boolean
+            valueStack.push(BOOLEAN);
+        }
+    }
+
+    if (valueStack.size() != 1)
+        throw "Expressão inválida";
 
     _lexer.nextToken();
 
-    return tINTEGER;
+    return valueStack.top() == INTEGER ? tINTEGER : tBOOLEAN;
 }
 
 /**

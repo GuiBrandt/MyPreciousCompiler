@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     Parser p("teste.txt");
 
     try {
-        p.compileExpression();
+        printf("%d", p.compileExpression());
     } catch (const char* e) {
         printf(e);
     }
