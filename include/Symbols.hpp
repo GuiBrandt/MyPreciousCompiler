@@ -29,6 +29,9 @@ class Symbol
         /// Obtém o nível do símbolo
         unsigned char getLevel() const;
 
+        /// Define o nível do símbolo
+        void setLevel(unsigned char);
+
     private:
 
         /// Nome do símbolo

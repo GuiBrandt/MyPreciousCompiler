@@ -1,4 +1,5 @@
 #include "include/Lexer.hpp"
+#include <cstdlib>
 
 /**
  * Teste do lexer

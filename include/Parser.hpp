@@ -24,6 +24,8 @@ class Parser
 
         Function getFunction(const char*) const;
 
+        char hasSymbolAtLevel(const char*, unsigned char) const;
+
         void addVariable(const Variable&);
 
         void addProcedure(const Procedure&);
@@ -36,11 +38,11 @@ class Parser
 
         int _functionSize = 100;
 
-        int _varIndex = 0;
+        int _varCount = 0;
 
-        int _procedureIndex = 0;
+        int _procedureCount = 0;
 
-        int _functionIndex = 0;
+        int _functionCount = 0;
 
         int _level = 0;
 
@@ -51,6 +53,10 @@ class Parser
         void deleteVariable(const char*);
 
         void compileParameters(const Procedure*);
+
+        void increaseLevel();
+
+        void decreaseLevel();
 
     public:
         /// Construtor

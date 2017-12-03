@@ -25,6 +25,11 @@ unsigned char Symbol::getLevel() const
     return this->_level;
 }
 
+void Symbol::setLevel(unsigned char level)
+{
+    this->_level = level;
+}
+
 Variable::Variable(const char* name, unsigned char level, ValueType type)
 : Symbol(name, level)
 {
