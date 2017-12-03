@@ -10,10 +10,10 @@
 char* Lexer::reserved[] = {
     "if",  "else",    "var",     "procedure", "function", "begin", "while",
     "end", "program", "integer", "boolean",   "+",        "-",     "/",
-    "*",   "mod",     "and",     "or",        "xor",      "not",   "=",
+    "*",   "%",       "&&",      "||",        "^",        "!",     "==",
     "<>",  ">",       "<",       ">=",        "<=",       "(",     ")",
-    "[",   "]",       ":=",      "write",     "read",     "true",  "false",
-    ",",   ";",       ":",       NULL
+    "=",   "write",   "read",    "true",      "false",    ",",     ";",
+    ":",   NULL
 };
 
 /**
@@ -25,7 +25,7 @@ Lexer::Lexer(const char* filename) throw (const char*)
 {
     _file = fopen(filename, "r");
     if (_file == NULL)
-        throw "Arquivo inexistente";
+        throw "Arquivo inexistente.";
 
     _integer = 0;
     _name = NULL;
@@ -39,17 +39,18 @@ Lexer::Lexer(const char* filename) throw (const char*)
  */
 TokenType Lexer::getTokenType(const char*& token) const throw ()
 {
-    int i = 0;
-    while(reserved[i]!= NULL){
-        if(strcmp(reserved[i],token)==0)
-            return (TokenType)i;
-        i++;
-    }
-
-    if(isdigit(token[0]))
+    if (isdigit(token[0]))
         return NUMBER;
 
-    return NAME;
+    int i;
+    for (i = 0; reserved[i] != NULL; i++)
+        if(strcmp(reserved[i], token) == 0)
+            return (TokenType)i;
+
+    if (isalpha(token[0]))
+        return NAME;
+
+    return UNKNOWN;
 }
 
 /**

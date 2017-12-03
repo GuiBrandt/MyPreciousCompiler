@@ -40,9 +40,6 @@ typedef enum
     OPEN_PARENTESIS,
     CLOSE_PARENTESIS,
 
-    OPEN_BRACKET,
-    CLOSE_BRACKET,
-
     SETTER,
 
     WRITE,

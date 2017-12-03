@@ -277,7 +277,7 @@ void Parser::decreaseLevel()
 /**
  * Compila o cabeçalho do programa
  */
-void Parser::compileProgramBeginning()
+void Parser::compileProgram()
 {
     TokenType prox = _lexer.getToken();
     if(prox != PROGRAM)
@@ -291,7 +291,7 @@ void Parser::compileProgramBeginning()
     if (prox != SEMICOLON)
         throw "';' esperado";
 
-    _lexer.nextToken();
+    prox = _lexer.nextToken();
 
     if (prox == VAR)
         compileVariableDeclaration();
@@ -354,6 +354,7 @@ void Parser::compileCompositeCommand()
     if(prox != BEGIN)
         throw "Begin esperado";
 
+    // Sobe um nível
     increaseLevel();
 
     prox = _lexer.nextToken();
@@ -366,6 +367,7 @@ void Parser::compileCompositeCommand()
 
     _lexer.nextToken();
 
+    // Desce um nível
     decreaseLevel();
 }
 
@@ -409,25 +411,29 @@ void Parser::compileCommand()
  */
 char isoperator(TokenType tokenType)
 {
-    return tokenType >= SUM && tokenType <= NOT;
+    return tokenType >= SUM && tokenType <= SMALLER_OR_EQUAL;
 }
 
 /**
  * Compila uma expressão
+ *
+ * Essa função em especial usa recursos do C++ ao invés de C porque deus me
+ * livre de implementar todas as estruturas de dados que seriam necessárias pra
+ * fazer uma conversão de sequência infixa em posfixa na mão.
  *
  * \return O tipo da expressão compilada
  */
 ValueType Parser::compileExpression()
 {
     ValueType type;
-    TokenType prox = _lexer.getToken();
+    TokenType prox;
 
-    // Usando o mapa, vetor e a pilha do C++ mesmo porque não dá tempo de
-    // programar classes eficientes par isso na voadora assim e eu quero
-    // usar notação posfixa pra isso aqui
+    // TokenType para '-' unário prefixado, não faz sentido existir para o
+    // lexer mas aqui ele é necessário
+    static const TokenType NEGATIVE = (TokenType)(UNKNOWN + 1);
 
     // Prioridades
-    static const std::map<TokenType, int> priority = {
+    static std::map<TokenType, int> priority = {
         { OPEN_PARENTESIS,   4 },
         { AND,               3 },
         { OR,                3 },
@@ -435,6 +441,7 @@ ValueType Parser::compileExpression()
         { NOT,               3 },
         { MULTIPLY,          2 },
         { DIVIDE,            2 },
+        { NEGATIVE,          2 },
         { SUM,               1 },
         { SUBTRACT,          1 },
         { EQUAL,             0 },
@@ -446,37 +453,112 @@ ValueType Parser::compileExpression()
         { CLOSE_PARENTESIS, -1 }
     };
 
+    // Vetor com a sequência posfixa
     std::vector<TokenType> v;
+
+    // Pilha usada como intermediário para os operadores
     std::stack<TokenType> s;
 
-    while (prox == TRUE || prox == FALSE || prox == NUMBER || prox == NAME ||
-           isoperator(prox) || prox == OPEN_PARENTESIS ||
-           prox == CLOSE_PARENTESIS)
-    {
+    bool hasLeftValue = false;
+
+    for (
+        prox = _lexer.getToken();
+
+        prox == TRUE     || prox == FALSE           ||
+        prox == NUMBER   || prox == NAME            ||
+        isoperator(prox) || prox == OPEN_PARENTESIS ||
+        prox == CLOSE_PARENTESIS;
+
+        prox = _lexer.nextToken()
+    ) {
+        // Se for um valor, seu tipo é adicionado direto ao vetor
         if (prox == NUMBER)
+        {
             v.push_back(INTEGER);
+            hasLeftValue = true;
+        }
         else if (prox == TRUE || prox == FALSE)
+        {
             v.push_back(BOOLEAN);
+            hasLeftValue = true;
+        }
         else if (prox == NAME)
         {
             ValueType t;
+
             try {
-                t = compileFunctionCall();
-            } catch (const char* e) {
-                Variable v = getVariable(_lexer.getName());
-                t = v.getType();
+                getProcedure(_lexer.getName());
+                throw "Expressão inválida: Procedimento não retorna um valor.";
+            } catch (const char* e0) {
+                try {
+                    t = compileFunctionCall();
+                } catch (const char* e1) {
+                    Variable v = getVariable(_lexer.getName());
+                    t = v.getType();
+                }
             }
 
             if (t == tINTEGER)
                 v.push_back(INTEGER);
             else
                 v.push_back(BOOLEAN);
+
+            hasLeftValue = true;
+        }
+
+        // Se não for valor, deve ser um operador
+        else
+        {
+            if (!hasLeftValue && (prox == SUM || prox == SUBTRACT))
+            {
+                if (prox == SUBTRACT)
+                    v.push_back(NEGATIVE);
+                else
+                    continue;   // '+' prefixado é inútil
+            }
+
+            // Esvazia a pilha enquanto a prioridade do que estiver no topo for
+            // maior que a do operador atual
+            while (s.size() > 0 && (
+                s.top() == OPEN_PARENTESIS ?
+                    prox == CLOSE_PARENTESIS :
+                        priority[s.top()] >= priority[prox])
+            ) {
+                TokenType op = s.top();
+                s.pop();
+
+                if (op != OPEN_PARENTESIS)
+                    v.push_back(op);
+                else if (prox == CLOSE_PARENTESIS)
+                    break;
+            }
+
+            hasLeftValue = false;
+
+            // A não ser que seja um fecha parêntesis, que não aparece, coloca
+            // o operador na pilha
+            if (prox != CLOSE_PARENTESIS)
+                s.push(prox);
         }
     }
 
+    // Esvazia o que sobrou na pilha
+    while (s.size() > 0)
+    {
+        TokenType op = s.top();
+        s.pop();
+
+        if (op != OPEN_PARENTESIS && op != CLOSE_PARENTESIS)
+            v.push_back(op);
+    }
+
+    unsigned int i;
+    for (i = 0; i < v.size(); i++)
+        printf("%02x\r\n", v[i]);
+
     _lexer.nextToken();
 
-    return type;
+    return tINTEGER;
 }
 
 /**
@@ -488,13 +570,20 @@ void Parser::compileIf()
     if (prox != IF)
         throw "If esperado";
 
-    _lexer.nextToken();
+    prox = _lexer.nextToken();
+    if (prox != OPEN_PARENTESIS)
+        throw "'(' esperado";
 
+    prox = _lexer.nextToken();
     ValueType type = compileExpression();
     if (type != tBOOLEAN)
         throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
+    if (prox != CLOSE_PARENTESIS)
+        throw "')' esperado";
+
+    prox = _lexer.nextToken();
     if (prox == BEGIN)
         compileCompositeCommand();
     else
@@ -521,12 +610,20 @@ void Parser::compileWhile()
     if(prox != WHILE)
         throw "While esperado";
 
+    prox = _lexer.nextToken();
+    if (prox != OPEN_PARENTESIS)
+        throw "'(' esperado";
+
+    prox = _lexer.nextToken();
     ValueType type = compileExpression();
-    if(type != tBOOLEAN)
+    if (type != tBOOLEAN)
         throw "Expressão booleana esperada";
 
     prox = _lexer.getToken();
+    if (prox != CLOSE_PARENTESIS)
+        throw "')' esperado";
 
+    prox = _lexer.nextToken();
     if (prox == BEGIN)
         compileCompositeCommand();
     else

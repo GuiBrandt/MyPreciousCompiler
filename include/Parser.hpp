@@ -63,7 +63,7 @@ class Parser
         Parser(const char*) throw (const char*);
 
         /// Compila o cabeçalho do programa
-        void compileProgramBeginning();
+        void compileProgram();
 
         /// Compila uma lista de variáveis
         void compileVariableDeclaration();
