@@ -90,10 +90,11 @@
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512324510 source:d:\projetos\mypreciouscompiler\main.cpp
+1512329020 source:d:\projetos\mypreciouscompiler\main.cpp
 	"include/Lexer.hpp"
-	"include/PARSER.HPP"
+	"include/Parser.hpp"
 	<cstdlib>
+	<cstring>
 
 1512311580 d:\projetos\mypreciouscompiler\include\lexer.hpp
 	<cstdio>
