@@ -27,8 +27,8 @@ Lexer::Lexer(const char* filename) throw (const char*)
 
     _integer = 0;
     _name = NULL;
-    _line = 1;
-    _column = 0;
+    _line = _lineAux = 1;
+    _column = _columnAux = 0;
 }
 
 /**
@@ -76,7 +76,7 @@ char Lexer::readChar()
 {
     char c = (char)fgetc(_file);
 
-    _column++;
+    _columnAux++;
 
     return (char)c;
 }
@@ -88,6 +88,9 @@ char Lexer::readChar()
  */
 TokenType Lexer::nextToken() throw (const char*)
 {
+    _line = _lineAux;
+    _column = _columnAux;
+
     _integer = 0;
     _name = NULL;
 
@@ -124,7 +127,7 @@ TokenType Lexer::nextToken() throw (const char*)
         while (isalnum(chr) && chr != EOF);
 
         ungetc(chr, _file);
-        _column--;
+        _columnAux--;
 
         temp[temp_used] = '\0';
         TokenType r = getTokenType((const char*&)temp);
@@ -162,7 +165,7 @@ TokenType Lexer::nextToken() throw (const char*)
         while (isdigit(chr));
 
         ungetc(chr, _file);
-        _column--;
+        _columnAux--;
 
         temp[temp_used] = '\0';
 
@@ -202,7 +205,7 @@ TokenType Lexer::nextToken() throw (const char*)
         while (!isalnum(chr) && !isspace(chr) && chr != EOF);
 
         ungetc(chr, _file);
-        _column--;
+        _columnAux--;
 
         temp[temp_used] = '\0';
         TokenType t = getTokenType((const char*&)temp);
@@ -241,7 +244,7 @@ char Lexer::hasMoreTokens() throw ()
         if (chr != EOF && !isspace(chr))
         {
         	ungetc(chr, _file);
-        	_column--;
+        	_columnAux--;
 
             return true;
         }
@@ -249,8 +252,8 @@ char Lexer::hasMoreTokens() throw ()
         {
             if (chr == '\n')
             {
-                _line++;
-                _column = 0;
+                _lineAux++;
+                _columnAux = 0;
             }
         }
     }

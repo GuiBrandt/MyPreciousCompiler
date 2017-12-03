@@ -57,9 +57,11 @@ class Lexer
 
         /// Linha atual do lexer
         int _line;
+        int _lineAux;
 
         /// Coluna atual do lexer
         int _column;
+        int _columnAux;
 
         /// Última palavra lida
         TokenType _lastToken = (TokenType)-1;

@@ -1,6 +1,7 @@
 #include "include/Lexer.hpp"
 #include "include/Parser.hpp"
 
+#include <ctype.h>
 #include <cstdlib>
 #include <cstring>
 
@@ -88,16 +89,18 @@ int main(int argc, char** argv)
 
             FILE* file = fopen(filename, "r");
 
-            int line = 0;
+            int line = 1;
             while (line < p.currentLine())
                 if (fgetc(file) == '\n') line++;
 
             char chr;
             while ((chr = fgetc(file)) != '\n')
-                fprintf(stderr, "%c", chr);
+                fprintf(stderr, "%c", chr == '\t' ? ' ' : chr);
+
+            fprintf(stderr, "\r\n");
 
             int i;
-            for (i = 0; i < p.currentColumn(); i++)
+            for (i = 0; i <= p.currentColumn(); i++)
                 fprintf(stderr, " ");
 
             fprintf(stderr, "^\r\n");

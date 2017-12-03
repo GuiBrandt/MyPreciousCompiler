@@ -13,7 +13,7 @@ begin
 end;
 
 begin
-	a = 1;
+	a = 1 + true;
 
 	read a;
 	read b;
