@@ -19,7 +19,7 @@ program Prog1;
         if Func1(5) == 7 then begin
             a = true;
             c = not b;
-        end
+        end;
         else begin
             a = not b;
             c = false;
@@ -34,11 +34,11 @@ begin
     a = 5;
     b = 7;
 
-    while (a<b || (a>500 && b>700)) do
+    while (a<b or (a>500 and b>700)) do
     begin
-        Proc1(a<b);
-        a = a+2;
-        b = 2*b;
+		Proc1(a < b);
+        a = a + 2;
+        b = 2 * b;
     end;
 
     write (a);

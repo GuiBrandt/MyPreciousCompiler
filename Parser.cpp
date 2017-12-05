@@ -55,7 +55,7 @@ Variable Parser::getVariable(const char* name) const
     }
 
     if (r == NULL)
-        throw "Variável não encontrada";
+        throw "Símbolo não encontrado";
     else
         return *r;
 }
@@ -79,7 +79,7 @@ Function Parser::getFunction(const char* name) const
     }
 
     if (r == NULL)
-        throw "Função não encontrada";
+        throw "Símbolo não encontrado";
     else
         return *r;
 }
@@ -372,7 +372,7 @@ void Parser::compileCommand()
         {
             compileFunctionCall();
 
-            if (_lexer.getToken() != SEMICOLON)
+            if (_lexer.nextToken() != SEMICOLON)
                 throw "';' esperado";
             _lexer.nextToken();
         }

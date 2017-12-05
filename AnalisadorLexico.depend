@@ -111,7 +111,7 @@
 
 1512496332 d:\projetos\mypreciouscompiler\include\symbols.hpp
 
-1512521184 source:d:\projetos\mypreciouscompiler\parser.cpp
+1512521616 source:d:\projetos\mypreciouscompiler\parser.cpp
 	"include/Parser.hpp"
 	"include/Lexer.hpp"
 	<cstdlib>
