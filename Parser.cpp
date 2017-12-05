@@ -17,7 +17,6 @@
 Parser::Parser(const char* filename) throw (const char*) : _lexer(filename)
 {
     _var = (Variable*)malloc(sizeof(Variable)*_varSize);
-    _procedure = (Procedure*)malloc(sizeof(Procedure)*_procedureSize);
     _function = (Function*)malloc(sizeof(Function)* _functionSize);
 }
 
@@ -57,30 +56,6 @@ Variable Parser::getVariable(const char* name) const
 
     if (r == NULL)
         throw "Variável não encontrada";
-    else
-        return *r;
-}
-
-/**
- * Obtém um procedimento
- */
-Procedure Parser::getProcedure(const char* name) const
-{
-    Procedure* r = NULL;
-    int level = -1;
-
-    int i;
-    for (i = 0; i < _procedureCount; i++)
-    {
-        if (_level - _procedure[i].getLevel() < _level - level && strcmp(_procedure[i].getName(), name) == 0)
-        {
-            r = &_procedure[i];
-            level = _procedure[i].getLevel();
-        }
-    }
-
-    if (r == NULL)
-        throw "Procedimento não encontrado";
     else
         return *r;
 }
@@ -126,10 +101,6 @@ char Parser::hasSymbolAtLevel(const char* name, unsigned char level) const
         if (_var[i].getLevel() == level && strcmp(_var[i].getName(), name) == 0)
             return 1;
 
-    for (i = 0; i < _procedureCount; i++)
-        if (_procedure[i].getLevel() == level && strcmp(_procedure[i].getName(), name) == 0)
-            return 1;
-
     for (i = 0; i < _functionCount; i++)
         if (_function[i].getLevel() == level && strcmp(_function[i].getName(), name) == 0)
             return 1;
@@ -155,26 +126,6 @@ void Parser::addVariable(const Variable& v)
     }
 
     _var[_varCount++] = v;
-}
-
-/**
- * Adiciona um procedimento
- */
-void Parser::addProcedure(const Procedure& p)
-{
-    if (hasSymbolAtLevel(p.getName(), _level))
-        throw "Já existe um símbolo com este nome no escopo atual";
-
-    if (_procedureCount >= _procedureSize)
-    {
-        Procedure* aux = (Procedure*)malloc(sizeof(Procedure) * _procedureSize * 2);
-        memcpy(aux, _procedure, sizeof(Procedure) * _procedureSize);
-        free(_procedure);
-        _procedure = aux;
-        _procedureSize *= 2;
-    }
-
-    _procedure[_procedureCount++] = p;
 }
 
 /**
@@ -208,35 +159,14 @@ void Parser::deleteFunction(const char* name)
         if (_function[i].getLevel() == _level && strcmp(_function[i].getName(), name) == 0)
         {
             int j;
-            for(j=i; j<_functionCount; j++)
-                _function[j] = _function[j+1];
+            for(j = i; j < _functionCount - 1; j++)
+                _function[j] = _function[j + 1];
             _functionCount--;
             return;
         }
     }
 
     throw "Função não encontrada";
-}
-
-/**
- * Apaga um procedimento
- */
-void Parser::deleteProcedure(const char* name)
-{
-    int i;
-    for (i = 0; i < _procedureCount; i++)
-    {
-        if (_procedure[i].getLevel() == _level && strcmp(_procedure[i].getName(), name) == 0)
-        {
-            int j;
-            for(j=i; j<_procedureCount; j++)
-                _procedure[j] = _procedure[j+1];
-            _procedureCount--;
-            return;
-        }
-    }
-
-    throw "Procedimento não encontrado";
 }
 
 /**
@@ -250,29 +180,15 @@ void Parser::deleteVariable(const char* name)
         if (_var[i].getLevel() == _level && strcmp(_var[i].getName(), name) == 0)
         {
             int j;
-            for(j=i; j<_varCount; j++)
-                _var[j] = _var[j+1];
+            for (j = i; j < _varCount - 1; j++)
+                _var[j] = _var[j + 1];
             _varCount--;
+
             return;
         }
     }
 
     throw "Variável não encontrada";
-}
-
-/**
- * Verifica se um procedimento existe
- *
- * \param name Nome do procedimento
- */
-char Parser::hasProcedure(const char* name)
-{
-    int i;
-    for (i = 0; i < _procedureCount; i++)
-        if (strcmp(_procedure[i].getName(), name) == 0)
-            return 1;
-
-    return 0;
 }
 
 /**
@@ -320,16 +236,12 @@ void Parser::decreaseLevel()
 {
     int i;
 
-    for (i = 0; i < _varCount; i++)
-        if (_var[i].getLevel() >= _level)
+    for (i = _varCount - 1; i > 0; i--)
+        if (_var[i].getLevel() == _level)
             deleteVariable(_var[i].getName());
 
-    for (i = 0; i < _procedureCount; i++)
-        if (_procedure[i].getLevel() >= _level)
-            deleteProcedure(_procedure[i].getName());
-
-    for (i = 0; i < _functionCount; i++)
-        if (_function[i].getLevel() >= _level)
+    for (i = _functionCount - 1; i > 0; i--)
+        if (_function[i].getLevel() == _level)
             deleteFunction(_function[i].getName());
 
     _level--;
@@ -422,9 +334,6 @@ void Parser::compileCompositeCommand()
     if(prox != BEGIN)
         throw "Begin esperado";
 
-    // Sobe um nível
-    increaseLevel();
-
     prox = _lexer.nextToken();
 
     while (prox != END)
@@ -436,9 +345,6 @@ void Parser::compileCompositeCommand()
     prox = _lexer.nextToken();
     if (prox != SEMICOLON)
         throw "';' esperado";
-
-    // Desce um nível
-    decreaseLevel();
 
     prox = _lexer.nextToken();
 }
@@ -452,6 +358,8 @@ void Parser::compileCommand()
 
     if (prox == IF)
         compileIf();
+    else if (prox == BEGIN)
+        compileCompositeCommand();
     else if (prox == WHILE)
         compileWhile();
     else if (prox == FUNCTION)
@@ -460,11 +368,16 @@ void Parser::compileCommand()
         compileProcedure();
     else if (prox == NAME)
     {
-        if (hasFunction(_lexer.getName()) || hasProcedure(_lexer.getName()))
-            compileMethodCall();
+        if (hasFunction(_lexer.getName()))
+        {
+            compileFunctionCall();
+
+            if (_lexer.getToken() != SEMICOLON)
+                throw "';' esperado";
+            _lexer.nextToken();
+        }
         else
             compileVariableAttribution();
-
     }
     else if (prox == WRITE)
         compileWrite();
@@ -553,6 +466,7 @@ ValueType Parser::compileExpression()
         { NOT,               3 },
         { MULTIPLY,          3 },
         { DIVIDE,            3 },
+        { MOD,               3 },
         { NEGATIVE,          3 },
         { SUM,               2 },
         { SUBTRACT,          2 },
@@ -605,26 +519,16 @@ ValueType Parser::compileExpression()
 
             const char* name = _lexer.getName();
 
-            try {
-                getProcedure(name);
-                t = (ValueType)-1;
-            } catch (const char* e0) {
-                try {
-                    getFunction(name);
-                    t = (ValueType)-2;
-                } catch (const char* e1) {
-                    if (_lexer.getToken() != NAME)
-                        throw e1;
-
-                    Variable resultVector = getVariable(name);
-                    t = resultVector.getType();
-                }
+            if (hasFunction(name))
+                t = compileFunctionCall();
+            else
+            {
+                Variable resultVector = getVariable(name);
+                t = resultVector.getType();
             }
 
-            if (t == (ValueType)-2)
-                compileFunctionCall();
-            else if (t == (ValueType)-1)
-                throw "Expressão inválida: Procedimento não retorna um valor.";
+            if (t == tVOID)
+                throw "Expressão inválida: procedimento não tem valor";
 
             if (t == tINTEGER)
                 resultVector.push_back(INTEGER);
@@ -716,7 +620,7 @@ ValueType Parser::compileExpression()
                 throw "Expressão inválida";
 
             if (valueStack.top() != BOOLEAN)
-                throw "Não é possível aplicar '!' ao tipo Boolean";
+                throw "Não é possível aplicar 'not' ao tipo Integer";
 
             // Teoricamente aqui ele tira um da pilha e põe outro, mas como
             // não tem valores ia só tirar BOOLEAN e colocar de novo.
@@ -819,20 +723,13 @@ void Parser::compileIf()
         throw "'then' esperado";
 
     prox = _lexer.nextToken();
-    if (prox == BEGIN)
-        compileCompositeCommand();
-    else
-        compileCommand();
+    compileCommand();
 
     prox = _lexer.getToken();
     if (prox == ELSE)
     {
         prox = _lexer.nextToken();
-
-        if (prox == BEGIN)
-            compileCompositeCommand();
-        else
-            compileCommand();
+        compileCommand();
     }
 }
 
@@ -855,10 +752,7 @@ void Parser::compileWhile()
         throw "'do' esperado";
 
     prox = _lexer.nextToken();
-    if (prox == BEGIN)
-        compileCompositeCommand();
-    else
-        compileCommand();
+    compileCommand();
 }
 
 /**
@@ -942,6 +836,12 @@ void Parser::compileProcedure()
     Parameter* parameters;
     int n = compileParameterDeclaration(&parameters);
 
+    prox = _lexer.getToken();
+    if (prox != SEMICOLON)
+        throw "';' esperado";
+
+    prox = _lexer.nextToken();
+
     increaseLevel();
 
     int i;
@@ -951,8 +851,8 @@ void Parser::compileProcedure()
         addVariable(v);
     }
 
-    Procedure p(name, _level - 1, n, parameters);
-    addProcedure(p);
+    Function p(name, _level - 1, tVOID, n, parameters);
+    addFunction(p);
 
     prox = _lexer.getToken();
 
@@ -998,6 +898,10 @@ void Parser::compileFunction()
         type = tBOOLEAN;
     else
         throw "Tipo da função esperado.";
+
+    prox = _lexer.nextToken();
+    if (prox != SEMICOLON)
+        throw "';' esperado";
 
     increaseLevel();
 
@@ -1050,33 +954,12 @@ void Parser::compileVariableAttribution()
 }
 
 /**
- * Compila uma chamada de método
- */
-void Parser::compileMethodCall()
-{
-    TokenType prox = _lexer.getToken();
-    if (prox != NAME)
-        throw "Nome esperado.";
-
-    const char* name = _lexer.getName();
-
-    if (hasFunction(name))
-        compileFunctionCall();
-    else
-        compileProcedureCall();
-
-    prox = _lexer.nextToken();
-    if (prox != SEMICOLON)
-        throw "';' esperado";
-}
-
-/**
  * Compila a lista de parâmetros passada para uma chamada de função ou
  * procedimento
  *
  * \param method Ponteiro para a função ou procedimento sendo chamado
  */
-void Parser::compileParameters(const Procedure* method)
+void Parser::compileParameters(const Function& method)
 {
     TokenType prox = _lexer.getToken();
     if (prox == SEMICOLON)
@@ -1099,10 +982,10 @@ void Parser::compileParameters(const Procedure* method)
         else if (prox != CLOSE_PARENTESIS)
             throw "')' esperado";
 
-        if (n + 1 > method->getParameterCount())
+        if (n + 1 > method.getParameterCount())
             throw "Número inválido de parâmetros.";
 
-        if (method->getParameters()[n].getType() != type)
+        if (method.getParameters()[n].getType() != type)
             throw "Tipo inválido para este parâmetro.";
 
         n++;
@@ -1125,24 +1008,7 @@ ValueType Parser::compileFunctionCall()
 
     _lexer.nextToken();
 
-    compileParameters(&f);
+    compileParameters(f);
 
     return f.getReturnType();
-}
-
-/**
- * Compila uma chamada de procedimento
- */
-void Parser::compileProcedureCall()
-{
-    TokenType prox = _lexer.getToken();
-    if (prox != NAME)
-        throw "Nome esperado.";
-
-    const char* name = _lexer.getName();
-    Procedure p = getProcedure(name);
-
-    _lexer.nextToken();
-
-    compileParameters(&p);
 }

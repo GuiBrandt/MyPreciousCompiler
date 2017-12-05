@@ -90,28 +90,28 @@
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512347780 source:d:\projetos\mypreciouscompiler\main.cpp
+1512385672 source:d:\projetos\mypreciouscompiler\main.cpp
 	"include/Lexer.hpp"
 	"include/Parser.hpp"
 	<ctype.h>
 	<cstdlib>
 	<cstring>
 
-1512346172 d:\projetos\mypreciouscompiler\include\lexer.hpp
+1512385984 d:\projetos\mypreciouscompiler\include\lexer.hpp
 	<cstdio>
 	"TokenType.hpp"
 
 1512322770 d:\projetos\mypreciouscompiler\include\tokentype.hpp
 
-1512313774 source:d:\projetos\mypreciouscompiler\symbols.cpp
+1512496248 source:d:\projetos\mypreciouscompiler\symbols.cpp
 	"include/Symbols.hpp"
 	<cstring>
 	<cstdarg>
 	<cstdlib>
 
-1512236888 d:\projetos\mypreciouscompiler\include\symbols.hpp
+1512496332 d:\projetos\mypreciouscompiler\include\symbols.hpp
 
-1512346950 source:d:\projetos\mypreciouscompiler\parser.cpp
+1512521184 source:d:\projetos\mypreciouscompiler\parser.cpp
 	"include/Parser.hpp"
 	"include/Lexer.hpp"
 	<cstdlib>
@@ -121,14 +121,56 @@
 	<vector>
 	<stack>
 
-1512326864 d:\projetos\mypreciouscompiler\include\parser.hpp
+1512495922 d:\projetos\mypreciouscompiler\include\parser.hpp
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512346730 source:d:\projetos\mypreciouscompiler\lexer.cpp
+1512385480 source:d:\projetos\mypreciouscompiler\lexer.cpp
 	"include/Lexer.hpp"
 	<ctype.h>
 	<cstring>
 	<cstdlib>
 	<cstdio>
+
+1512381880 source:f:\projetos\mypreciouscompiler\lexer.cpp
+	"include/Lexer.hpp"
+	<ctype.h>
+	<cstring>
+	<cstdlib>
+	<cstdio>
+
+1512382384 f:\projetos\mypreciouscompiler\include\lexer.hpp
+	<cstdio>
+	"TokenType.hpp"
+
+1512319170 f:\projetos\mypreciouscompiler\include\tokentype.hpp
+
+1512493488 source:f:\projetos\mypreciouscompiler\parser.cpp
+	"include/Parser.hpp"
+	"include/Lexer.hpp"
+	<cstdlib>
+	<cstring>
+	<cstdio>
+	<map>
+	<vector>
+	<stack>
+
+1512492322 f:\projetos\mypreciouscompiler\include\parser.hpp
+	"Lexer.hpp"
+	"Symbols.hpp"
+
+1512492732 f:\projetos\mypreciouscompiler\include\symbols.hpp
+
+1512492648 source:f:\projetos\mypreciouscompiler\symbols.cpp
+	"include/Symbols.hpp"
+	<cstring>
+	<cstdarg>
+	<cstdlib>
+
+1512382072 source:f:\projetos\mypreciouscompiler\main.cpp
+	"include/Lexer.hpp"
+	"include/Parser.hpp"
+	<ctype.h>
+	<cstdlib>
+	<cstring>
 

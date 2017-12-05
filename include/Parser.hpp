@@ -13,52 +13,31 @@ class Parser
         Lexer _lexer;
 
         Variable* _var;
-
-        Procedure* _procedure;
-
         Function* _function;
 
         Variable getVariable(const char*) const;
-
-        Procedure getProcedure(const char*) const;
-
         Function getFunction(const char*) const;
 
         char hasSymbolAtLevel(const char*, unsigned char) const;
 
         void addVariable(const Variable&);
-
-        void addProcedure(const Procedure&);
-
         void addFunction(const Function&);
 
         int _varSize = 100;
-
-        int _procedureSize = 100;
-
         int _functionSize = 100;
 
         int _varCount = 0;
-
-        int _procedureCount = 0;
-
         int _functionCount = 0;
 
         int _level = 0;
 
-        void deleteProcedure(const char*);
-
+        void deleteVariable(const char*);
         void deleteFunction(const char*);
 
-        void deleteVariable(const char*);
-
-        char hasProcedure(const char*);
-
+        char hasVariable(const char*);
         char hasFunction(const char*);
 
-        char hasVariable(const char*);
-
-        void compileParameters(const Procedure*);
+        void compileParameters(const Function&);
 
         void increaseLevel();
 
@@ -105,9 +84,7 @@ class Parser
         int compileParameterDeclaration(Parameter**);
 
         /// Compila uma chamada de função/procedimento
-        void compileMethodCall();
         ValueType compileFunctionCall();
-        void compileProcedureCall();
 
         /// Compila um comando composto (começa em `begin', termina em `end')
         void compileCompositeCommand();

@@ -9,8 +9,8 @@
 /// Vetor de palavras reservadas
 char* Lexer::reserved[] = {
     "if", "then", "else", "var", "procedure", "function", "begin", "while",
-    "do", "end", "program", "integer", "boolean", "+", "-", "/", "*", "%",
-    "&&", "||", "^", "!", "==", "!=", ">", "<", ">=", "<=", "(", ")", "=",
+    "do", "end", "program", "integer", "boolean", "+", "-", "/", "*", "mod",
+    "and", "or", "xor", "not", "==", "<>", ">", "<", ">=", "<=", "(", ")", "=",
     "write", "read", "true", "false", ",", ";", ":", NULL
 };
 

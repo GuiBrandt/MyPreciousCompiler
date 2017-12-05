@@ -2,13 +2,14 @@ program teste;
 
 var a : integer, b : integer;
 
-procedure test()
+procedure test();
 var d : boolean;
 begin
-	write 1 == 1 && d;
+	write 1 == 1 and not d;
 end;
 
-function test2(arg : integer) : integer
+
+function test2(arg : integer) : integer;
 var c : integer;
 begin
 	write arg + c;

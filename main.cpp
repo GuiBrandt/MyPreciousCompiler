@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 
+/* NÃO TEM COR ;u;
 #define ANSI_COLOR_RED     "\x1b[1;31m"
 #define ANSI_COLOR_GREEN   "\x1b[1;32m"
 #define ANSI_COLOR_YELLOW  "\x1b[1;33m"
@@ -14,6 +15,17 @@
 #define ANSI_COLOR_CYAN    "\x1b[1;36m"
 #define ANSI_COLOR_GRAY    "\x1b[1;30m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+*/
+
+#define ANSI_COLOR_RED     ""
+#define ANSI_COLOR_GREEN   ""
+#define ANSI_COLOR_YELLOW  ""
+#define ANSI_COLOR_BLUE    ""
+#define ANSI_COLOR_MAGENTA ""
+#define ANSI_COLOR_TEAL    ""
+#define ANSI_COLOR_CYAN    ""
+#define ANSI_COLOR_GRAY    ""
+#define ANSI_COLOR_RESET   ""
 
 /**
  * Análise léxica

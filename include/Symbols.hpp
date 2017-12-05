@@ -7,7 +7,8 @@
 typedef enum
 {
     tINTEGER,
-    tBOOLEAN
+    tBOOLEAN,
+    tVOID
 }
 ValueType;
 
@@ -47,33 +48,16 @@ class Symbol
 class Variable : public Symbol
 {
     public:
-
-        /// Union de valor
-        typedef union
-        {
-            int i;
-            char b;
-        } Value;
-
         /// Construtor
         Variable(const char*, unsigned char, ValueType);
 
-        /// Construtor
-        Variable(const char*, unsigned char, ValueType, Value);
-
         /// Obtém o tipo da variável
         ValueType getType() const;
-
-        /// Obtém o valor da variável
-        Value getValue() const;
 
     private:
 
         /// Tipo da variável
         ValueType _type;
-
-        /// Valor da variável
-        Value _value;
 };
 
 /**
@@ -99,34 +83,9 @@ class Parameter : public Symbol
 };
 
 /**
- * Classe para os procedimentos
- */
-class Procedure : public Symbol
-{
-    public:
-
-        /// Construtor
-        Procedure(const char*, unsigned char, int, Parameter*);
-
-        /// Obtém o número de parâmetros do procedimento
-        int getParameterCount() const;
-
-        /// Obtém a lista de parâmetros do procedimento
-        const Parameter* getParameters() const;
-
-    private:
-
-        /// Número de parâmetros do procedimento
-        int _nParameters;
-
-        /// Lista de parâmetros do procedimento
-        Parameter* _parameters;
-};
-
-/**
  * Classe para as funções
  */
-class Function : public Procedure
+class Function : public Symbol
 {
     public:
 
@@ -136,10 +95,22 @@ class Function : public Procedure
         /// Obtém o tipo de retorno da função
         ValueType getReturnType() const;
 
+        /// Obtém o número de parâmetros da função
+        int getParameterCount() const;
+
+        /// Obtém os parâmetros da função
+        const Parameter* getParameters() const;
+
     private:
 
         /// Tipo de retorno da função
         ValueType _returnType;
+
+        /// Número de parâmetros da função
+        int _nParameters;
+
+        /// Vetor de parâmetros da função
+        Parameter* _parameters;
 };
 
 #endif // SYMBOLS_HPP_INCLUDED
