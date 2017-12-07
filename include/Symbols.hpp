@@ -68,10 +68,13 @@ class Parameter : public Symbol
     public:
 
         /// Construtor
-        Parameter(const char*, unsigned char, ValueType);
+        Parameter(const char*, unsigned char, ValueType, char);
 
         /// Obtém o tipo do parâmetro
         ValueType getType() const;
+
+        /// Verifica se é referência
+        char isReference() const;
 
         /// Define o tipo do símbolo
         void setType(ValueType);
@@ -80,6 +83,9 @@ class Parameter : public Symbol
 
         /// Tipo do parâmetro
         ValueType _type;
+
+        /// Flag de referência
+        char _reference;
 };
 
 /**

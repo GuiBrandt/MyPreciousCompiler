@@ -111,7 +111,7 @@ int main(int argc, char** argv)
             fprintf(stderr, "\r\n");
 
             int i;
-            for (i = 0; i < p.currentColumn(); i++)
+            for (i = 1; i < p.currentColumn(); i++)
                 fprintf(stderr, " ");
 
             fprintf(stderr, ANSI_COLOR_RED "^" ANSI_COLOR_RESET "\r\n");

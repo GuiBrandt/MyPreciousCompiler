@@ -31,6 +31,11 @@ class Parser
 
         int _level = 0;
 
+        char _isInsideConditional;
+
+        const char* _runningFunction;
+        ValueType _returnType;
+
         void deleteVariable(const char*);
         void deleteFunction(const char*);
 
@@ -84,13 +89,20 @@ class Parser
         int compileParameterDeclaration(Parameter**);
 
         /// Compila uma chamada de função/procedimento
-        ValueType compileFunctionCall();
+        ValueType compileFunctionCall(const char*);
+
+        /// Compila um retorno de função
+        void compileFunctionReturn(const char*);
 
         /// Compila um comando composto (começa em `begin', termina em `end')
         void compileCompositeCommand();
 
         /// Compila um comando simples
         void compileCommand();
+
+        /// Compila um comando dentro de outro (como no if e no while)
+        /// basicamente igual ao compileCommand, mas não exige ';'
+        void compileNestedCommand();
 
         /// Compila uma expressão e retorna seu tipo
         ValueType compileExpression();

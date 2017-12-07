@@ -10,7 +10,7 @@
 char* Lexer::reserved[] = {
     "if", "then", "else", "var", "procedure", "function", "begin", "while",
     "do", "end", "program", "integer", "boolean", "+", "-", "/", "*", "mod",
-    "and", "or", "xor", "not", "==", "<>", ">", "<", ">=", "<=", "(", ")", "=",
+    "and", "or", "xor", "not", "==", "<>", ">", "<", ">=", "<=", "(", ")", ":=",
     "write", "read", "true", "false", ",", ";", ":", NULL
 };
 
@@ -96,6 +96,9 @@ TokenType Lexer::nextToken() throw (const char*)
 
 	if (!hasMoreTokens())
 		return END_OF_FILE;
+
+    _line = _lineAux;
+    _column = _columnAux;
 
     char* temp;
     int temp_length, temp_used;
@@ -197,10 +200,17 @@ TokenType Lexer::nextToken() throw (const char*)
 
             temp[temp_used++] = chr;
 
-            chr = fgetc(_file);
-
-            if (chr == ')' || chr == ';' || chr == ',')
+            if (chr == '(' || chr == ')' || chr == ';' || chr == ',')
+            {
+                chr = readChar();
                 break;
+            }
+            else
+            {
+                chr = readChar();
+                if (chr == ')' || chr == ';' || chr == ',')
+                    break;
+            }
         }
         while (!isalnum(chr) && !isspace(chr) && chr != EOF);
 
@@ -243,8 +253,35 @@ char Lexer::hasMoreTokens() throw ()
         chr = readChar();
         if (chr != EOF && !isspace(chr))
         {
-        	ungetc(chr, _file);
-        	_columnAux--;
+            if (chr == '/')
+            {
+                // Comentário, ignora tudo até o fim da linha
+                chr = readChar();
+                if (chr == '/')
+                {
+                    while (chr != '\n' && chr != EOF)
+                        chr = readChar();
+
+                    if (chr == '\n')
+                    {
+                        _lineAux++;
+                        _columnAux = 1;
+                    }
+
+                    continue;
+                }
+                else
+                {
+                    ungetc(chr, _file);
+                    ungetc('/', _file);
+                    _columnAux -= 2;
+                }
+            }
+            else
+            {
+                ungetc(chr, _file);
+                _columnAux--;
+            }
 
             return true;
         }

@@ -42,15 +42,21 @@ ValueType Variable::getType() const
     return this->_type;
 }
 
-Parameter::Parameter(const char* name, unsigned char level, ValueType type)
+Parameter::Parameter(const char* name, unsigned char level, ValueType type, char var)
 : Symbol(name, level)
 {
     this->_type = type;
+    this->_reference = var;
 }
 
 ValueType Parameter::getType() const
 {
     return this->_type;
+}
+
+char Parameter::isReference() const
+{
+    return this->_reference;
 }
 
 void Parameter::setType(ValueType type)

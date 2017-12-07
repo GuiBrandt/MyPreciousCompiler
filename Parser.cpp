@@ -18,6 +18,10 @@ Parser::Parser(const char* filename) throw (const char*) : _lexer(filename)
 {
     _var = (Variable*)malloc(sizeof(Variable)*_varSize);
     _function = (Function*)malloc(sizeof(Function)* _functionSize);
+
+    _runningFunction = NULL;
+
+    _isInsideConditional = 0;
 }
 
 /**
@@ -113,7 +117,9 @@ char Parser::hasSymbolAtLevel(const char* name, unsigned char level) const
  */
 void Parser::addVariable(const Variable& v)
 {
-    if (hasSymbolAtLevel(v.getName(), _level))
+    printf("add variable %s at level %d\r\n", v.getName(), v.getLevel());
+
+    if (hasSymbolAtLevel(v.getName(), v.getLevel()))
         throw "Já existe um símbolo com este nome no escopo atual";
 
     if (_varCount >= _varSize)
@@ -133,7 +139,9 @@ void Parser::addVariable(const Variable& v)
  */
 void Parser::addFunction(const Function& f)
 {
-    if (hasSymbolAtLevel(f.getName(), _level))
+    printf("add function %s at level %d\r\n", f.getName(), f.getLevel());
+
+    if (hasSymbolAtLevel(f.getName(), f.getLevel()))
         throw "Já existe um símbolo com este nome no escopo atual";
 
     if (_functionCount >= _functionSize)
@@ -153,8 +161,10 @@ void Parser::addFunction(const Function& f)
  */
 void Parser::deleteFunction(const char* name)
 {
+    printf("delete function %s at level %d\r\n", name, _level);
+
     int i;
-    for (i = 0; i < _functionCount; i++)
+    for (i = _functionCount - 1; i >= 0; i--)
     {
         if (_function[i].getLevel() == _level && strcmp(_function[i].getName(), name) == 0)
         {
@@ -174,8 +184,10 @@ void Parser::deleteFunction(const char* name)
  */
 void Parser::deleteVariable(const char* name)
 {
+    printf("delete variable %s at level %d\r\n", name, _level);
+
     int i;
-    for (i = 0; i < _varCount; i++)
+    for (i = _varCount - 1; i >= 0; i++)
     {
         if (_var[i].getLevel() == _level && strcmp(_var[i].getName(), name) == 0)
         {
@@ -227,6 +239,7 @@ char Parser::hasVariable(const char* name)
 void Parser::increaseLevel()
 {
     _level++;
+    printf("level up to %d\r\n", _level);
 }
 
 /**
@@ -234,6 +247,8 @@ void Parser::increaseLevel()
  */
 void Parser::decreaseLevel()
 {
+    printf("level down to %d\r\n", _level - 1);
+
     int i;
 
     for (i = _varCount - 1; i > 0; i--)
@@ -343,10 +358,6 @@ void Parser::compileCompositeCommand()
     }
 
     prox = _lexer.nextToken();
-    if (prox != SEMICOLON)
-        throw "';' esperado";
-
-    prox = _lexer.nextToken();
 }
 
 /**
@@ -354,27 +365,39 @@ void Parser::compileCompositeCommand()
  */
 void Parser::compileCommand()
 {
+    compileNestedCommand();
+
+    if (_lexer.getToken() != SEMICOLON)
+        throw "';' esperado";
+    _lexer.nextToken();
+}
+
+/**
+ * Compila um comando dentro de outro (como no if e no while)
+ * basicamente igual ao compileCommand, mas não exige ';'
+ */
+void Parser::compileNestedCommand()
+{
     TokenType prox = _lexer.getToken();
 
+    // Para o IF e para o WHILE não é necessário o ';' porque o próprio comando dentro deles
+    // exige isso
     if (prox == IF)
         compileIf();
-    else if (prox == BEGIN)
-        compileCompositeCommand();
     else if (prox == WHILE)
         compileWhile();
-    else if (prox == FUNCTION)
-        compileFunction();
-    else if (prox == PROCEDURE)
-        compileProcedure();
+    else if (prox == BEGIN)
+        compileCompositeCommand();
     else if (prox == NAME)
     {
         if (hasFunction(_lexer.getName()))
         {
-            compileFunctionCall();
+            const char* name = _lexer.getName();
 
-            if (_lexer.nextToken() != SEMICOLON)
-                throw "';' esperado";
-            _lexer.nextToken();
+            if (_lexer.nextToken() == SETTER)
+                compileFunctionReturn(name);
+            else
+                compileFunctionCall(name);
         }
         else
             compileVariableAttribution();
@@ -401,12 +424,6 @@ void Parser::compileWrite()
 
     prox = _lexer.nextToken();
     compileExpression();
-
-    prox = _lexer.getToken();
-    if (prox != SEMICOLON)
-        throw "';' esperado";
-
-    _lexer.nextToken();
 }
 
 /**
@@ -424,12 +441,6 @@ void Parser::compileRead()
         throw "Nome esperado";
 
     getVariable(_lexer.getName());
-
-    prox = _lexer.nextToken();
-    if (prox != SEMICOLON)
-        throw "';' esperado";
-
-    _lexer.nextToken();
 }
 
 /**
@@ -520,7 +531,10 @@ ValueType Parser::compileExpression()
             const char* name = _lexer.getName();
 
             if (hasFunction(name))
-                t = compileFunctionCall();
+            {
+                _lexer.nextToken();
+                t = compileFunctionCall(name);
+            }
             else
             {
                 Variable resultVector = getVariable(name);
@@ -722,14 +736,18 @@ void Parser::compileIf()
     if (prox != THEN)
         throw "'then' esperado";
 
+    _isInsideConditional = 1;
+
     prox = _lexer.nextToken();
-    compileCommand();
+    compileNestedCommand();
+
+    _isInsideConditional = 0;
 
     prox = _lexer.getToken();
     if (prox == ELSE)
     {
         prox = _lexer.nextToken();
-        compileCommand();
+        compileNestedCommand();
     }
 }
 
@@ -751,8 +769,12 @@ void Parser::compileWhile()
     if (prox != DO)
         throw "'do' esperado";
 
+    _isInsideConditional = 1;
+
     prox = _lexer.nextToken();
-    compileCommand();
+    compileNestedCommand();
+
+    _isInsideConditional = 0;
 }
 
 /**
@@ -783,11 +805,18 @@ int Parser::compileParameterDeclaration(Parameter** params)
             *params = aux;
         }
 
+        char var = 0;
+
+        if (prox == VAR)
+        {
+            var = 1;
+            prox = _lexer.nextToken();
+        }
+
         if (prox != NAME)
             throw "Nome do parâmetro esperado";
 
-        (*params)[n].setName(_lexer.getName());
-        (*params)[n].setLevel(_level);
+        Parameter p(_lexer.getName(), _level, tVOID, var);
 
         prox = _lexer.nextToken();
         if (prox != COLON)
@@ -797,7 +826,10 @@ int Parser::compileParameterDeclaration(Parameter** params)
         if (prox != INTEGER && prox != BOOLEAN)
             throw "Tipo do parâmetro esperado";
 
-        (*params)[n].setType(prox == INTEGER ? tINTEGER : tBOOLEAN);
+        p.setType(prox == INTEGER ? tINTEGER : tBOOLEAN);
+
+        Variable v(p.getName(), _level, p.getType());
+        addVariable(v);
 
         prox = _lexer.nextToken();
 
@@ -833,6 +865,8 @@ void Parser::compileProcedure()
 
     prox = _lexer.nextToken();
 
+    increaseLevel();
+
     Parameter* parameters;
     int n = compileParameterDeclaration(&parameters);
 
@@ -842,15 +876,6 @@ void Parser::compileProcedure()
 
     prox = _lexer.nextToken();
 
-    increaseLevel();
-
-    int i;
-    for (i = 0; i < n; i++)
-    {
-        Variable v(parameters[i].getName(), _level, parameters[i].getType());
-        addVariable(v);
-    }
-
     Function p(name, _level - 1, tVOID, n, parameters);
     addFunction(p);
 
@@ -859,9 +884,30 @@ void Parser::compileProcedure()
     if (prox == VAR)
         compileVariableDeclaration();
 
+    prox = _lexer.getToken();
+
+    while (prox == PROCEDURE || prox == FUNCTION)
+    {
+        printf("lmao\r\n");
+        if (prox == PROCEDURE)
+            compileProcedure();
+        else
+            compileFunction();
+
+        prox = _lexer.getToken();
+    }
+
+    printf("1\r\n");
     compileCompositeCommand();
+    printf("2\r\n");
 
     decreaseLevel();
+
+    prox = _lexer.getToken();
+    if (prox != SEMICOLON)
+        throw "';' esperado";
+
+    _lexer.nextToken();
 }
 
 /**
@@ -881,6 +927,8 @@ void Parser::compileFunction()
     const char* name = _lexer.getName();
 
     prox = _lexer.nextToken();
+
+    increaseLevel();
 
     Parameter* parameters;
     int n = compileParameterDeclaration(&parameters);
@@ -903,15 +951,6 @@ void Parser::compileFunction()
     if (prox != SEMICOLON)
         throw "';' esperado";
 
-    increaseLevel();
-
-    int i;
-    for (i = 0; i < n; i++)
-    {
-        Variable v(parameters[i].getName(), _level, parameters[i].getType());
-        addVariable(v);
-    }
-
     Function f(name, _level - 1, type, n, parameters);
     addFunction(f);
 
@@ -920,9 +959,38 @@ void Parser::compileFunction()
     if (prox == VAR)
         compileVariableDeclaration();
 
+    prox = _lexer.getToken();
+
+    while (prox == PROCEDURE || prox == FUNCTION)
+    {
+        printf("lmfao\r\n");
+        if (prox == PROCEDURE)
+            compileProcedure();
+        else
+            compileFunction();
+
+        prox = _lexer.getToken();
+    }
+
+    _runningFunction = name;
+    _returnType = tVOID;
+
+    printf("asd\r\n");
     compileCompositeCommand();
+    printf("bsd\r\n");
+
+    _runningFunction = NULL;
+    if (_returnType == tVOID)
+        throw "É possível que a função não retorne nenhum valor.";
+    _returnType = tVOID;
 
     decreaseLevel();
+
+    prox = _lexer.getToken();
+    if (prox != SEMICOLON)
+        throw "';' esperado";
+
+    _lexer.nextToken();
 }
 
 /**
@@ -938,19 +1006,13 @@ void Parser::compileVariableAttribution()
 
     prox = _lexer.nextToken();
     if (prox != SETTER)
-        throw "'=' esperado.";
+        throw "':=' esperado.";
 
     prox = _lexer.nextToken();
     ValueType t = compileExpression();
 
     if (t != v.getType())
         throw "Tipo inválido para a variável.";
-
-    prox = _lexer.getToken();
-    if (prox != SEMICOLON)
-        throw "';' esperado.";
-
-    _lexer.nextToken();
 }
 
 /**
@@ -973,14 +1035,29 @@ void Parser::compileParameters(const Function& method)
     prox = _lexer.nextToken();
     while (prox != CLOSE_PARENTESIS)
     {
-        ValueType type = compileExpression();
+        ValueType type;
+        if (!method.getParameters()[n].isReference())
+        {
+            type = compileExpression();
+            prox = _lexer.getToken();
+        }
+        else if (prox == NAME)
+        {
+            const char* name = _lexer.getName();
 
-        prox = _lexer.getToken();
+            prox = _lexer.nextToken();
+
+            if (prox != COMMA || prox != CLOSE_PARENTESIS)
+                throw "Parâmetro por referência esperado.";
+            else if (getVariable(name).getType() != method.getParameters()[n].getType())
+                throw "Tipo inválido para este parâmetro.";
+        }
+
 
         if (prox == COMMA)
             prox = _lexer.nextToken();
         else if (prox != CLOSE_PARENTESIS)
-            throw "')' esperado";
+            throw "')' esperado.";
 
         if (n + 1 > method.getParameterCount())
             throw "Número inválido de parâmetros.";
@@ -990,6 +1067,9 @@ void Parser::compileParameters(const Function& method)
 
         n++;
     }
+
+    if (n < method.getParameterCount())
+        throw "Número inválido de parâmetros.";
 }
 
 /**
@@ -997,18 +1077,37 @@ void Parser::compileParameters(const Function& method)
  *
  * \return O tipo da função
  */
-ValueType Parser::compileFunctionCall()
+ValueType Parser::compileFunctionCall(const char* name)
 {
-    TokenType prox = _lexer.getToken();
-    if (prox != NAME)
-        throw "Nome esperado.";
-
-    const char* name = _lexer.getName();
     Function f = getFunction(name);
+    compileParameters(f);
+    return f.getReturnType();
+}
+
+/**
+ * Compila um retorno de função
+ *
+ * \param name Nome da função
+ */
+void Parser::compileFunctionReturn(const char* name)
+{
+    printf("returning from %s\r\n", name);
+
+    if (strcmp(name, _runningFunction) != 0)
+        throw "Operação inválida.";
+
+    TokenType prox = _lexer.getToken();
+    if (prox != SETTER)
+        throw "':=' esperado.";
 
     _lexer.nextToken();
 
-    compileParameters(f);
+    ValueType type = compileExpression();
+    Function f = getFunction(name);
 
-    return f.getReturnType();
+    if (f.getReturnType() != type)
+        throw "Tipo inválido para retorno da função!";
+
+    if (!_isInsideConditional)
+        _returnType = type;
 }

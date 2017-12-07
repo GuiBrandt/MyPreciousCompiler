@@ -90,7 +90,7 @@
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512385672 source:d:\projetos\mypreciouscompiler\main.cpp
+1512522088 source:d:\projetos\mypreciouscompiler\main.cpp
 	"include/Lexer.hpp"
 	"include/Parser.hpp"
 	<ctype.h>
@@ -103,15 +103,15 @@
 
 1512322770 d:\projetos\mypreciouscompiler\include\tokentype.hpp
 
-1512496248 source:d:\projetos\mypreciouscompiler\symbols.cpp
+1512613516 source:d:\projetos\mypreciouscompiler\symbols.cpp
 	"include/Symbols.hpp"
 	<cstring>
 	<cstdarg>
 	<cstdlib>
 
-1512496332 d:\projetos\mypreciouscompiler\include\symbols.hpp
+1512613484 d:\projetos\mypreciouscompiler\include\symbols.hpp
 
-1512521616 source:d:\projetos\mypreciouscompiler\parser.cpp
+1512614788 source:d:\projetos\mypreciouscompiler\parser.cpp
 	"include/Parser.hpp"
 	"include/Lexer.hpp"
 	<cstdlib>
@@ -121,11 +121,11 @@
 	<vector>
 	<stack>
 
-1512495922 d:\projetos\mypreciouscompiler\include\parser.hpp
+1512614850 d:\projetos\mypreciouscompiler\include\parser.hpp
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512385480 source:d:\projetos\mypreciouscompiler\lexer.cpp
+1512609428 source:d:\projetos\mypreciouscompiler\lexer.cpp
 	"include/Lexer.hpp"
 	<ctype.h>
 	<cstring>
@@ -173,4 +173,46 @@
 	<ctype.h>
 	<cstdlib>
 	<cstring>
+
+1512518488 source:e:\projetos\mypreciouscompiler\main.cpp
+	"include/Lexer.hpp"
+	"include/Parser.hpp"
+	<ctype.h>
+	<cstdlib>
+	<cstring>
+
+1512382384 e:\projetos\mypreciouscompiler\include\lexer.hpp
+	<cstdio>
+	"TokenType.hpp"
+
+1512319170 e:\projetos\mypreciouscompiler\include\tokentype.hpp
+
+1512492322 e:\projetos\mypreciouscompiler\include\parser.hpp
+	"Lexer.hpp"
+	"Symbols.hpp"
+
+1512492732 e:\projetos\mypreciouscompiler\include\symbols.hpp
+
+1512518352 source:e:\projetos\mypreciouscompiler\parser.cpp
+	"include/Parser.hpp"
+	"include/Lexer.hpp"
+	<cstdlib>
+	<cstring>
+	<cstdio>
+	<map>
+	<vector>
+	<stack>
+
+1512492648 source:e:\projetos\mypreciouscompiler\symbols.cpp
+	"include/Symbols.hpp"
+	<cstring>
+	<cstdarg>
+	<cstdlib>
+
+1512568338 source:e:\projetos\mypreciouscompiler\lexer.cpp
+	"include/Lexer.hpp"
+	<ctype.h>
+	<cstring>
+	<cstdlib>
+	<cstdio>
 
