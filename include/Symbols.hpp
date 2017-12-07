@@ -76,6 +76,9 @@ class Parameter : public Symbol
         /// Verifica se é referência
         char isReference() const;
 
+        /// Define se é referência
+        void setReference(char);
+
         /// Define o tipo do símbolo
         void setType(ValueType);
 

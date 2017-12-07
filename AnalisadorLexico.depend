@@ -132,20 +132,20 @@
 	<cstdlib>
 	<cstdio>
 
-1512381880 source:f:\projetos\mypreciouscompiler\lexer.cpp
+1512654008 source:f:\projetos\mypreciouscompiler\lexer.cpp
 	"include/Lexer.hpp"
 	<ctype.h>
 	<cstring>
 	<cstdlib>
 	<cstdio>
 
-1512382384 f:\projetos\mypreciouscompiler\include\lexer.hpp
+1512653848 f:\projetos\mypreciouscompiler\include\lexer.hpp
 	<cstdio>
 	"TokenType.hpp"
 
-1512319170 f:\projetos\mypreciouscompiler\include\tokentype.hpp
+1512650368 f:\projetos\mypreciouscompiler\include\tokentype.hpp
 
-1512493488 source:f:\projetos\mypreciouscompiler\parser.cpp
+1512654566 source:f:\projetos\mypreciouscompiler\parser.cpp
 	"include/Parser.hpp"
 	"include/Lexer.hpp"
 	<cstdlib>
@@ -155,19 +155,19 @@
 	<vector>
 	<stack>
 
-1512492322 f:\projetos\mypreciouscompiler\include\parser.hpp
+1512611250 f:\projetos\mypreciouscompiler\include\parser.hpp
 	"Lexer.hpp"
 	"Symbols.hpp"
 
-1512492732 f:\projetos\mypreciouscompiler\include\symbols.hpp
+1512651816 f:\projetos\mypreciouscompiler\include\symbols.hpp
 
-1512492648 source:f:\projetos\mypreciouscompiler\symbols.cpp
+1512651828 source:f:\projetos\mypreciouscompiler\symbols.cpp
 	"include/Symbols.hpp"
 	<cstring>
 	<cstdarg>
 	<cstdlib>
 
-1512382072 source:f:\projetos\mypreciouscompiler\main.cpp
+1512651132 source:f:\projetos\mypreciouscompiler\main.cpp
 	"include/Lexer.hpp"
 	"include/Parser.hpp"
 	<ctype.h>

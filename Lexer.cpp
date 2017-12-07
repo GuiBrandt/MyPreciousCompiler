@@ -10,8 +10,8 @@
 char* Lexer::reserved[] = {
     "if", "then", "else", "var", "procedure", "function", "begin", "while",
     "do", "end", "program", "integer", "boolean", "+", "-", "/", "*", "mod",
-    "and", "or", "xor", "not", "==", "<>", ">", "<", ">=", "<=", "(", ")", ":=",
-    "write", "read", "true", "false", ",", ";", ":", NULL
+    "and", "&&", "or", "||", "xor", "not", "==", "<>", ">", "<", ">=", "<=", "(", ")", ":=",
+    "write", "read", "true", "false", ",", ";", ":", ".", NULL
 };
 
 /**
@@ -53,15 +53,52 @@ int Lexer::currentColumn() const throw ()
  * \param token Palavra a ser analisada
  * \return O TokenType da palavra
  */
-TokenType Lexer::getTokenType(const char*& token) const throw ()
+TokenType Lexer::getTokenType(const char*& token) throw (const char*)
 {
     if (isdigit(token[0]))
+    {
+        if (token[1] == 'x')
+        {
+            int i;
+            for (i = 2; token[i] != 0; i++)
+                if (!(isdigit(token[i]) || (token[i] >= 'a' && token[i] <= 'f')))
+                    throw "Valor numérico hexadecimal inválido";
+
+            if (i == 2)
+                throw "Valor numérico hexadecimal inválido";
+        }
+        else if (token[1] == 'b')
+        {
+            int i;
+            for (i = 2; token[i] != 0; i++)
+                if (token[i] != '0' && token[i] != '1')
+                    throw "Valor numérico binário inválido";
+
+            if (i == 2)
+                throw "Valor numérico binário inválido";
+        }
+        else
+        {
+            int i;
+            for (i = 1; token[i] != 0; i++)
+                if (!isdigit(token[i]))
+                    throw "Valor numérico inválido";
+        }
+
         return NUMBER;
+    }
 
     int i;
     for (i = 0; reserved[i] != NULL; i++)
-        if(strcmp(reserved[i], token) == 0)
-            return (TokenType)i;
+        if (strcmp(reserved[i], token) == 0)
+        {
+            if ((TokenType)i == AND_S)
+                return AND;
+            else if ((TokenType)i == OR_S)
+                return OR;
+            else
+                return (TokenType)i;
+        }
 
     if (isalpha(token[0]))
         return NAME;
@@ -74,7 +111,7 @@ TokenType Lexer::getTokenType(const char*& token) const throw ()
  */
 char Lexer::readChar()
 {
-    char c = (char)fgetc(_file);
+    char c = (char)tolower((char)fgetc(_file));
 
     _columnAux++;
 
@@ -146,8 +183,8 @@ TokenType Lexer::nextToken() throw (const char*)
     }
     else if (isdigit(chr))
     {
-        char* temp= (char*)malloc(sizeof(char)*2 + 1);
-        temp_length = 2;
+        char* temp= (char*)malloc(sizeof(char)*8 + 1);
+        temp_length = 8;
         temp_used = 0;
 
         do
@@ -165,19 +202,21 @@ TokenType Lexer::nextToken() throw (const char*)
             temp[temp_used++] = chr;
             chr = readChar();
         }
-        while (isdigit(chr));
+        while (isalnum(chr));
 
         ungetc(chr, _file);
         _columnAux--;
 
         temp[temp_used] = '\0';
 
+        TokenType t = getTokenType((const char*&)temp);
+
         _integer = (int)strtol(temp, NULL, 10);
 
         free(temp);
 
-        _lastToken = NUMBER;
-        return NUMBER;
+        _lastToken = t;
+        return t;
     }
     else
     {

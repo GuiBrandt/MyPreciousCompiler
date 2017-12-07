@@ -117,8 +117,6 @@ char Parser::hasSymbolAtLevel(const char* name, unsigned char level) const
  */
 void Parser::addVariable(const Variable& v)
 {
-    printf("add variable %s at level %d\r\n", v.getName(), v.getLevel());
-
     if (hasSymbolAtLevel(v.getName(), v.getLevel()))
         throw "Já existe um símbolo com este nome no escopo atual";
 
@@ -139,8 +137,6 @@ void Parser::addVariable(const Variable& v)
  */
 void Parser::addFunction(const Function& f)
 {
-    printf("add function %s at level %d\r\n", f.getName(), f.getLevel());
-
     if (hasSymbolAtLevel(f.getName(), f.getLevel()))
         throw "Já existe um símbolo com este nome no escopo atual";
 
@@ -161,8 +157,6 @@ void Parser::addFunction(const Function& f)
  */
 void Parser::deleteFunction(const char* name)
 {
-    printf("delete function %s at level %d\r\n", name, _level);
-
     int i;
     for (i = _functionCount - 1; i >= 0; i--)
     {
@@ -184,8 +178,6 @@ void Parser::deleteFunction(const char* name)
  */
 void Parser::deleteVariable(const char* name)
 {
-    printf("delete variable %s at level %d\r\n", name, _level);
-
     int i;
     for (i = _varCount - 1; i >= 0; i++)
     {
@@ -239,7 +231,6 @@ char Parser::hasVariable(const char* name)
 void Parser::increaseLevel()
 {
     _level++;
-    printf("level up to %d\r\n", _level);
 }
 
 /**
@@ -247,8 +238,6 @@ void Parser::increaseLevel()
  */
 void Parser::decreaseLevel()
 {
-    printf("level down to %d\r\n", _level - 1);
-
     int i;
 
     for (i = _varCount - 1; i > 0; i--)
@@ -296,6 +285,9 @@ void Parser::compileProgram()
     }
 
     compileCompositeCommand();
+
+    if (_lexer.getToken() != DOT)
+        throw "'.' esperado";
 
     if (_lexer.hasMoreTokens())
         throw "Fim de arquivo esperado";
@@ -397,7 +389,10 @@ void Parser::compileNestedCommand()
             if (_lexer.nextToken() == SETTER)
                 compileFunctionReturn(name);
             else
+            {
                 compileFunctionCall(name);
+                _lexer.nextToken();
+            }
         }
         else
             compileVariableAttribution();
@@ -441,6 +436,8 @@ void Parser::compileRead()
         throw "Nome esperado";
 
     getVariable(_lexer.getName());
+
+    _lexer.nextToken();
 }
 
 /**
@@ -509,7 +506,6 @@ ValueType Parser::compileExpression()
         prox == NUMBER   || prox == NAME            ||
         isoperator(prox) || prox == OPEN_PARENTESIS ||
         (prox == CLOSE_PARENTESIS && hasOpenParentesis);
-
         prox = _lexer.nextToken()
     ) {
         // Se for um valor, seu tipo é adicionado direto ao vetor
@@ -557,6 +553,8 @@ ValueType Parser::compileExpression()
         {
             if (prox == OPEN_PARENTESIS)
                 hasOpenParentesis++;
+            else if (prox == CLOSE_PARENTESIS)
+                hasOpenParentesis--;
 
             if (!hasLeftValue && (prox == SUM || prox == SUBTRACT))
             {
@@ -565,6 +563,9 @@ ValueType Parser::compileExpression()
                 else
                     continue;   // '+' prefixado é inútil
             }
+
+            else if (hasLeftValue && prox == NOT)
+                throw "Operador de negação inesperado";
 
             // Esvazia a pilha enquanto a prioridade do que estiver no topo for
             // maior que a do operador atual
@@ -579,7 +580,6 @@ ValueType Parser::compileExpression()
                 if (op != OPEN_PARENTESIS)
                     resultVector.push_back(op);
                 else {
-                    hasOpenParentesis--;
                     if (prox == CLOSE_PARENTESIS)
                         break;
                 }
@@ -593,6 +593,10 @@ ValueType Parser::compileExpression()
                 symbolStack.push(prox);
         }
     }
+
+
+    if (hasOpenParentesis > 0)
+        throw "')' esperado.";
 
     // Esvazia o que sobrou na pilha
     while (symbolStack.size() > 0)
@@ -700,6 +704,9 @@ ValueType Parser::compileExpression()
             b = valueStack.top();
             valueStack.pop();
 
+            if ((a == BOOLEAN || b == BOOLEAN) && (int)resultVector[i] != EQUAL && (int)resultVector[i] != DIFFERENT)
+                throw "Não é possível usar comparadores para o tipo boolean";
+
             // Se forem tipos diferentes, um é integer e outro é boolean com
             // certeza, e isso tá errado.
             if (a != b)
@@ -784,7 +791,7 @@ int Parser::compileParameterDeclaration(Parameter** params)
 {
     TokenType prox = _lexer.getToken();
     if (prox != OPEN_PARENTESIS)
-        throw "Abre parênteses esperado";
+        throw "'(' esperado.";
 
     int n = 0;
 
@@ -816,7 +823,9 @@ int Parser::compileParameterDeclaration(Parameter** params)
         if (prox != NAME)
             throw "Nome do parâmetro esperado";
 
-        Parameter p(_lexer.getName(), _level, tVOID, var);
+        (*params)[n].setName(_lexer.getName());
+        (*params)[n].setLevel(_level);
+        (*params)[n].setReference(var);
 
         prox = _lexer.nextToken();
         if (prox != COLON)
@@ -826,13 +835,12 @@ int Parser::compileParameterDeclaration(Parameter** params)
         if (prox != INTEGER && prox != BOOLEAN)
             throw "Tipo do parâmetro esperado";
 
-        p.setType(prox == INTEGER ? tINTEGER : tBOOLEAN);
+        (*params)[n].setType(prox == INTEGER ? tINTEGER : tBOOLEAN);
 
-        Variable v(p.getName(), _level, p.getType());
+        Variable v((*params)[n].getName(), _level, (*params)[n].getType());
         addVariable(v);
 
         prox = _lexer.nextToken();
-
         if (prox != COMMA && prox != CLOSE_PARENTESIS)
             throw "')' esperado";
 
@@ -888,7 +896,6 @@ void Parser::compileProcedure()
 
     while (prox == PROCEDURE || prox == FUNCTION)
     {
-        printf("lmao\r\n");
         if (prox == PROCEDURE)
             compileProcedure();
         else
@@ -897,9 +904,7 @@ void Parser::compileProcedure()
         prox = _lexer.getToken();
     }
 
-    printf("1\r\n");
     compileCompositeCommand();
-    printf("2\r\n");
 
     decreaseLevel();
 
@@ -963,7 +968,6 @@ void Parser::compileFunction()
 
     while (prox == PROCEDURE || prox == FUNCTION)
     {
-        printf("lmfao\r\n");
         if (prox == PROCEDURE)
             compileProcedure();
         else
@@ -975,9 +979,7 @@ void Parser::compileFunction()
     _runningFunction = name;
     _returnType = tVOID;
 
-    printf("asd\r\n");
     compileCompositeCommand();
-    printf("bsd\r\n");
 
     _runningFunction = NULL;
     if (_returnType == tVOID)
@@ -1043,16 +1045,18 @@ void Parser::compileParameters(const Function& method)
         }
         else if (prox == NAME)
         {
+
             const char* name = _lexer.getName();
 
             prox = _lexer.nextToken();
 
             if (prox != COMMA || prox != CLOSE_PARENTESIS)
                 throw "Parâmetro por referência esperado.";
-            else if (getVariable(name).getType() != method.getParameters()[n].getType())
-                throw "Tipo inválido para este parâmetro.";
-        }
 
+            type = getVariable(name).getType();
+        }
+        else
+            throw "Parâmetro por referência esperado.";
 
         if (prox == COMMA)
             prox = _lexer.nextToken();
@@ -1091,10 +1095,8 @@ ValueType Parser::compileFunctionCall(const char* name)
  */
 void Parser::compileFunctionReturn(const char* name)
 {
-    printf("returning from %s\r\n", name);
-
-    if (strcmp(name, _runningFunction) != 0)
-        throw "Operação inválida.";
+    if (_runningFunction == NULL || strcmp(name, _runningFunction) != 0)
+        throw "Operação inválida nesse contexto.";
 
     TokenType prox = _lexer.getToken();
     if (prox != SETTER)

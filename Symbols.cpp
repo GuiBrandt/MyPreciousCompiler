@@ -59,6 +59,11 @@ char Parameter::isReference() const
     return this->_reference;
 }
 
+void Parameter::setReference(char r)
+{
+    this->_reference = r;
+}
+
 void Parameter::setType(ValueType type)
 {
     this->_type = type;

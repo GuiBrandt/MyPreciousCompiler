@@ -13,14 +13,15 @@ function test2(arg : integer) : integer;
 var c : integer;
 begin
 	write arg + c;
+	test2 := 0;
 end;
 
 begin
-	a = 1;
+	a := 1;
 
 	read a;
 	read b;
 
-	if a == 1 then write b;
+	if a == 1 then write b
 	else write test2(b);
 end;

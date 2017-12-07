@@ -11,6 +11,8 @@ program Prog1;
             d := b;
             b := 2*d-1;
         end;
+
+        Func1 := b;
     end;
 
     procedure Proc1 (b : boolean);
@@ -19,14 +21,14 @@ program Prog1;
         if Func1(5) == 7 then begin
             a := true;
             c := not b;
-        end;
+        end
         else begin
             a := not b;
             c := false;
         end;
 
         if (a and b or c) then
-            write a;
+            write a
         else
             write b;
     end;
@@ -42,4 +44,4 @@ begin
 
     write (a);
     write (b);
-end;
+end.

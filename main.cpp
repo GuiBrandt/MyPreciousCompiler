@@ -105,7 +105,7 @@ int main(int argc, char** argv)
                 if (fgetc(file) == '\n') line++;
 
             char chr;
-            while ((chr = fgetc(file)) != '\n')
+            while ((chr = fgetc(file)) != '\n' && chr != EOF)
                 fprintf(stderr, "%c", chr == '\t' ? ' ' : chr);
 
             fprintf(stderr, "\r\n");
@@ -115,6 +115,8 @@ int main(int argc, char** argv)
                 fprintf(stderr, " ");
 
             fprintf(stderr, ANSI_COLOR_RED "^" ANSI_COLOR_RESET "\r\n");
+
+            fclose(file);
 
             return -2;
         }

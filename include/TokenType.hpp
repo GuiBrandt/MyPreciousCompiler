@@ -28,7 +28,9 @@ typedef enum
     MOD,
 
     AND,
+    AND_S,
     OR,
+    OR_S,
     XOR,
     NOT,
 
@@ -53,6 +55,7 @@ typedef enum
     COMMA,
     SEMICOLON,
     COLON,
+    DOT,
 
     NUMBER,
     NAME,
